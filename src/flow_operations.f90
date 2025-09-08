@@ -2326,71 +2326,71 @@ END SUBROUTINE VORTEXCALC
 
 
 SUBROUTINE ENSTROPHY_CALC(N)
-!> @brief
-!> This subroutine computes the q-criterion
-IMPLICIT NONE
-INTEGER,INTENT(IN)::N
-INTEGER::KMAXE,I,IHGT,IHGJ
-REAL::SNORM,ONORM
-REAL,DIMENSION(3,3)::TVORT,SVORT,OVORT
-real,dimension(3,3)::taul,taur,TAU
-REAL,DIMENSION(3)::Q,NNN,nall
-REAL::UX,UY,UZ,VX,VY,VZ,WX,WY,WZ,RHO12,U12,V12,W12 ,damp,vdamp,TEMPXX
-REAL,DIMENSION(1:DIMS,1:DIMS)::VORTET1
-real,dimension(1:nof_Variables)::leftv
-real::MP_PINFL,gammal
-real,dimension(1:nof_Variables)::RIGHTv
-real::MP_PINFR,gammaR
-real::angle1,angle2,nx,ny,nz
-real,dimension(1:4)::viscl,laml
+  !> @brief
+  !> This subroutine computes the q-criterion
+  IMPLICIT NONE
+  INTEGER,INTENT(IN)::N
+  INTEGER::KMAXE,I,IHGT,IHGJ
+  REAL::SNORM,ONORM
+  REAL,DIMENSION(3,3)::TVORT,SVORT,OVORT
+  real,dimension(3,3)::taul,taur,TAU
+  REAL,DIMENSION(3)::Q,NNN,nall
+  REAL::UX,UY,UZ,VX,VY,VZ,WX,WY,WZ,RHO12,U12,V12,W12 ,damp,vdamp,TEMPXX
+  REAL,DIMENSION(1:DIMS,1:DIMS)::VORTET1
+  real,dimension(1:nof_Variables)::leftv
+  real::MP_PINFL,gammal
+  real,dimension(1:nof_Variables)::RIGHTv
+  real::MP_PINFR,gammaR
+  real::angle1,angle2,nx,ny,nz
+  real,dimension(1:4)::viscl,laml
 
-KMAXE=XMPIELRANK(N)
-!$OMP DO
-DO I=1,KMAXE
+  KMAXE=XMPIELRANK(N)
+  !$OMP DO
+  DO I=1,KMAXE
 
-    VORTET1(1:3,1:3)=ILOCAL_RECON3(I)%GRADS(1:3,1:3)
+      VORTET1(1:3,1:3)=ILOCAL_RECON3(I)%GRADS(1:3,1:3)
 
-    DO IHGT=1,3; DO IHGJ=1,3
-	      TVORT(IHGT,IHGJ)=VORTET1(IHGJ,IHGT)
-    END DO; END DO
+      DO IHGT=1,3; DO IHGJ=1,3
+          TVORT(IHGT,IHGJ)=VORTET1(IHGJ,IHGT)
+      END DO; END DO
 
-    OVORT=(VORTET1-TVORT)
-    ONORM=((OVORT(1,1)*OVORT(1,1))+(OVORT(1,2)*OVORT(1,2))+(OVORT(1,3)*OVORT(1,3))+&
+      OVORT=(VORTET1-TVORT)
+      ONORM=((OVORT(1,1)*OVORT(1,1))+(OVORT(1,2)*OVORT(1,2))+(OVORT(1,3)*OVORT(1,3))+&
         (OVORT(2,1)*OVORT(2,1))+(OVORT(2,2)*OVORT(2,2))+(OVORT(2,3)*OVORT(2,3))+(OVORT(3,1)*OVORT(3,1))+&
         (OVORT(3,2)*OVORT(3,2))+(OVORT(3,3)*OVORT(3,3)))
 
-    if(boundtype.eq.1)then
-	      IELEM(N,I)%VORTEX(2)=(0.5D0*(ONORM*u_c(i)%val(1,1)))
-	  else
-	      LEFTV(1:NOF_vARIABLES)=U_C(I)%VAL(1,1:NOF_vARIABLES)
-		    CALL CONS2PRIM(N,leftv,MP_PINFl,gammal)
-		    RIGHTV(1:NOF_vARIABLES)=LEFTV(1:NOF_vARIABLES)
-		    CALL SUTHERLAND(N,LEFTV,RIGHTV,VISCL,LAML)
+      if(boundtype.eq.1)then
+          IELEM(N,I)%VORTEX(2)=(0.5D0*(ONORM*u_c(i)%val(1,1)))
+      else
+          LEFTV(1:NOF_vARIABLES)=U_C(I)%VAL(1,1:NOF_vARIABLES)
+          CALL CONS2PRIM(N,leftv,MP_PINFl,gammal)
+          RIGHTV(1:NOF_vARIABLES)=LEFTV(1:NOF_vARIABLES)
+          CALL SUTHERLAND(N,LEFTV,RIGHTV,VISCL,LAML)
 
-        UX = ILOCAL_RECON3(I)%GRADS(1,1); UY = ILOCAL_RECON3(I)%GRADS(1,2); UZ = ILOCAL_RECON3(I)%GRADS(1,3);
-			  VX = ILOCAL_RECON3(I)%GRADS(2,1); VY = ILOCAL_RECON3(I)%GRADS(2,2); VZ = ILOCAL_RECON3(I)%GRADS(2,3);
-			  WX = ILOCAL_RECON3(I)%GRADS(3,1); WY = ILOCAL_RECON3(I)%GRADS(3,2); WZ = ILOCAL_RECON3(I)%GRADS(3,3);
+          UX = ILOCAL_RECON3(I)%GRADS(1,1); UY = ILOCAL_RECON3(I)%GRADS(1,2); UZ = ILOCAL_RECON3(I)%GRADS(1,3);
+          VX = ILOCAL_RECON3(I)%GRADS(2,1); VY = ILOCAL_RECON3(I)%GRADS(2,2); VZ = ILOCAL_RECON3(I)%GRADS(2,3);
+          WX = ILOCAL_RECON3(I)%GRADS(3,1); WY = ILOCAL_RECON3(I)%GRADS(3,2); WZ = ILOCAL_RECON3(I)%GRADS(3,3);
 
-        ! TAU_XX
-        TAUL(1,1) = (4.0D0/3.0D0)*UX - (2.0D0/3.0D0)*VY - (2.0D0/3.0D0)*WZ
-        ! TAU_YY
-        TAUL(2,2) = (4.0D0/3.0D0)*VY - (2.0D0/3.0D0)*UX - (2.0D0/3.0D0)*WZ
-        ! TAU_ZZ
-        TAUL(3,3) = (4.0D0/3.0D0)*WZ - (2.0D0/3.0D0)*UX - (2.0D0/3.0D0)*VY
-        ! tau_xy
-        TAUL(1,2) = (UY + VX);TAUL(2,1) = TAUL(1,2)
-        ! TAU_XZ
-        TAUL(1,3) = (WX + UZ);TAUL(3,1) = TAUL(1,3)
-        ! TAU_YZ
-        TAUL(2,3) = (VZ + WY);TAUL(3,2) = TAUL(2,3)
+          ! TAU_XX
+          TAUL(1,1) = (4.0D0/3.0D0)*UX - (2.0D0/3.0D0)*VY - (2.0D0/3.0D0)*WZ
+          ! TAU_YY
+          TAUL(2,2) = (4.0D0/3.0D0)*VY - (2.0D0/3.0D0)*UX - (2.0D0/3.0D0)*WZ
+          ! TAU_ZZ
+          TAUL(3,3) = (4.0D0/3.0D0)*WZ - (2.0D0/3.0D0)*UX - (2.0D0/3.0D0)*VY
+          ! tau_xy
+          TAUL(1,2) = (UY + VX);TAUL(2,1) = TAUL(1,2)
+          ! TAU_XZ
+          TAUL(1,3) = (WX + UZ);TAUL(3,1) = TAUL(1,3)
+          ! TAU_YZ
+          TAUL(2,3) = (VZ + WY);TAUL(3,2) = TAUL(2,3)
 
-        SNORM=((WY-VZ)**2)+((UZ-WX)**2)+((VX-UY)**2)
-        ielem(n,i)%vortex(2)=ielem(n,i)%TOTVOLUME*SNORM*viscl(1)
-        IELEM(N,I)%VORTEX(3)=(4.0/3.0)*VISCL(1)*((ux+vy+wz)**2)*ielem(n,i)%TOTVOLUME
-	  end if
+          SNORM=((WY-VZ)**2)+((UZ-WX)**2)+((VX-UY)**2)
+          ielem(n,i)%vortex(2)=ielem(n,i)%TOTVOLUME*SNORM*viscl(1)
+          IELEM(N,I)%VORTEX(3)=(4.0/3.0)*VISCL(1)*((ux+vy+wz)**2)*ielem(n,i)%TOTVOLUME
+      end if
 
-END DO
-!$OMP END DO
+  END DO
+  !$OMP END DO
 
 END SUBROUTINE ENSTROPHY_CALC
 
@@ -2399,35 +2399,35 @@ END SUBROUTINE ENSTROPHY_CALC
 
 
 SUBROUTINE VORTEXCALC2D(N)
-!> @brief
-!> This subroutine computes the q criterion for 2D
-  
-IMPLICIT NONE
-INTEGER,INTENT(IN)::N
-INTEGER::KMAXE,I,IHGT,IHGJ
-REAL::SNORM,ONORM
-REAL,DIMENSION(2,2)::TVORT,SVORT,OVORT
-REAL,DIMENSION(1:DIMS,1:DIMS)::VORTET1
+  !> @brief
+  !> This subroutine computes the q criterion for 2D
+    
+  IMPLICIT NONE
+  INTEGER,INTENT(IN)::N
+  INTEGER::KMAXE,I,IHGT,IHGJ
+  REAL::SNORM,ONORM
+  REAL,DIMENSION(2,2)::TVORT,SVORT,OVORT
+  REAL,DIMENSION(1:DIMS,1:DIMS)::VORTET1
 
-KMAXE=XMPIELRANK(N) 	 
- 	
-!$OMP DO
-DO I=1,KMAXE     
-    VORTET1(1:2,1:2)=ILOCAL_RECON3(I)%GRADS(1:2,1:2)    
-	    
-	  DO IHGT=1,2; DO IHGJ=1,2
-	      TVORT(IHGT,IHGJ)=VORTET1(IHGJ,IHGT)
-    END DO; END DO
-    SVORT=0.5D0*(VORTET1+TVORT)
-    OVORT=0.5D0*(VORTET1-TVORT)
-    SNORM=SQRT((SVORT(1,1)*SVORT(1,1))+(SVORT(1,2)*SVORT(1,2))+&
-        (SVORT(2,1)*SVORT(2,1))+(SVORT(2,2)*SVORT(2,2)))
-	  ONORM=SQRT((OVORT(1,1)*OVORT(1,1))+(OVORT(1,2)*OVORT(1,2))+&
-        (OVORT(2,1)*OVORT(2,1))+(OVORT(2,2)*OVORT(2,2)))
-	      
-	  IELEM(N,I)%VORTEX(1)=(0.5D0*((ONORM**2)-(SNORM**2)))
-END DO
-!$OMP END DO
+  KMAXE=XMPIELRANK(N) 	 
+    
+  !$OMP DO
+  DO I=1,KMAXE     
+      VORTET1(1:2,1:2)=ILOCAL_RECON3(I)%GRADS(1:2,1:2)    
+        
+      DO IHGT=1,2; DO IHGJ=1,2
+          TVORT(IHGT,IHGJ)=VORTET1(IHGJ,IHGT)
+      END DO; END DO
+      SVORT=0.5D0*(VORTET1+TVORT)
+      OVORT=0.5D0*(VORTET1-TVORT)
+      SNORM=SQRT((SVORT(1,1)*SVORT(1,1))+(SVORT(1,2)*SVORT(1,2))+&
+          (SVORT(2,1)*SVORT(2,1))+(SVORT(2,2)*SVORT(2,2)))
+      ONORM=SQRT((OVORT(1,1)*OVORT(1,1))+(OVORT(1,2)*OVORT(1,2))+&
+          (OVORT(2,1)*OVORT(2,1))+(OVORT(2,2)*OVORT(2,2)))
+          
+      IELEM(N,I)%VORTEX(1)=(0.5D0*((ONORM**2)-(SNORM**2)))
+  END DO
+  !$OMP END DO
 
 END SUBROUTINE VORTEXCALC2D
 
@@ -3773,327 +3773,320 @@ END SUBROUTINE EDDYVISCO2d
   
 
 SUBROUTINE TRAJECTORIES
-IMPLICIT NONE
-INTEGER::I,J,K,TRAJ1,TRAJ2,TRAJ3,TRAJ4,kmaxe,writeid,writeconf,num_Vg
-REAL::WIN1,WIN2,WIN3,WIN4,POST,POST1,POST2,POST3,POST4
-real,dimension(1:4)::pos_l,pos_g
-REAL,DIMENSION(1:NOF_VARIABLES)::LEFTV
-REAL::MP_PINFl,GAMMAL
-KMAXE=XMPIELRANK(N)
-POST1=TOLBIG
-POST2=TOLBIG
-POST3=-TOLBIG
-traj1=0
-TRAJ2=0
-TRAJ3=0
+  IMPLICIT NONE
+  INTEGER::I,J,K,TRAJ1,TRAJ2,TRAJ3,TRAJ4,kmaxe,writeid,writeconf,num_Vg
+  REAL::WIN1,WIN2,WIN3,WIN4,POST,POST1,POST2,POST3,POST4
+  real,dimension(1:4)::pos_l,pos_g
+  REAL,DIMENSION(1:NOF_VARIABLES)::LEFTV
+  REAL::MP_PINFl,GAMMAL
+  KMAXE=XMPIELRANK(N)
+  POST1=TOLBIG
+  POST2=TOLBIG
+  POST3=-TOLBIG
+  traj1=0
+  TRAJ2=0
+  TRAJ3=0
 
-if (dimensiona.eq.3)then
-  num_Vg=5
-else
-  num_Vg=4
-end if
-
-IF (INITCOND.EQ.157)THEN
-  pos_l(1:2)=zero
-  pos_g(1:2)=zero
-  DO I=1,KMAXE
-    LEFTV(1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
-    if (dimensiona.eq.3)then
-      CALL CONS2PRIM(N,leftv,MP_PINFl,gammal)
-    else
-      CALL cons2prim(N,leftv,MP_PINFl,gammal)
-    end if
-
-    IF ((LEFTV(NOF_VARIABLES)).GT.0.0D0)THEN  !total volume of gas evolution
-            pos_l(2)=pos_l(2)+(LEFTV(NOF_VARIABLES))*ielem(n,i)%totvolume
-    end if
-    IF (LEFTV(num_Vg).GT.pos_l(1))THEN  !total volume of gas evolution
-            pos_l(1)=MAX(pos_l(1),LEFTV(num_Vg))
-    end if
-  END Do
-  !find position globally
-  CALL MPI_ALLREDUCE(pos_l(1),pos_g(1),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
-  CALL MPI_ALLREDUCE(pos_l(2),pos_g(2),1,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IERROR)
-
-  IF (n.eq.0)THEN
-    OPEN(70,FILE='Volumex.DAT',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
-    WRITE(70,'(E14.7,1X,E14.7,1X,E14.7)')T,POS_G(1),POS_G(2)
-    close(70)
-  END IF
-
-  CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
-END IF
-
-IF (INITCOND.EQ.430)THEN
-  pos_l(1:2)=zero
-  pos_g(1:2)=zero
-  DO I=1,KMAXE
-    IF (U_C(I)%VAL(1,7).GT.0.1D0)THEN   !VOLUME FRACTION OF GAS to be used for lowest location tracking
-      IF (IELEM(N,I)%YYC.Le.POST3)THEN
-        POST3=IELEM(N,I)%YYC
-        TRAJ1=I
-      END IF
-    END IF   
-    IF (U_C(I)%VAL(1,7).GT.0.0D0)THEN  !total volume of gas evolution
-      pos_l(2)=pos_l(2)+U_C(I)%VAL(1,7)*ielem(n,i)%totvolume
-    end if
-  END Do
-
-  pos_l(1)=post3  !lowest position in my local  cpu
-
-  !find position globally
-  CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
-  CALL MPI_ALLREDUCE(pos_l(1),pos_g(1),1,MPI_DOUBLE_PRECISION,MPI_min,MPI_COMM_WORLD,IERROR)
-
-  !NOW SELECT WHICH CPU HAS THE SMALLEST
-  writeid=100000000
-  IF (ABS(POS_G(1)-POS_L(1)).LE.TOLSMALL/1000)THEN
-    IF (TRAJ1.GT.0)THEN
-      writeid=n
-    END IF
-  end if
-  !AND IF MORE THAN ONE, SELECT THE SMALLEST ID ONE
-  call mpi_barrier(mpi_comm_world,ierror)
-  CALL MPI_ALLREDUCE(writeid,writeconf,1,MPI_INTEGER,MPI_min,MPI_COMM_WORLD,IERROR)
-
-  if (writeid.EQ.writeconf)then
-    leftv(1:nof_Variables)=U_C(TRAJ1)%VAL(1,1:nof_Variables)
-
-    CALL cons2prim(N,leftv,MP_PINFl,gammal)
-    OPEN(70,FILE='position.DAT',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
-    WRITE(70,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POS_G(1),LEFTV(1),LEFTV(2),LEFTV(3),LEFTV(4),LEFTV(5),LEFTV(6),LEFTV(7)
-    close(70)
-    !the CPU that holds this cell will write its position
+  if (dimensiona.eq.3)then
+      num_Vg=5
+  else
+      num_Vg=4
   end if
 
-  CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
-    
-  CALL MPI_ALLREDUCE(pos_l(2:2),pos_g(2:2),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
-
-  IF (n.eq.0)THEN
-    OPEN(70,FILE='volume.DAT',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
-    WRITE(70,'(E14.7,1X,E14.7,1X,E14.7)')T,POS_G(2)
-    close(70)
-  END IF
-
-  CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
-
-END IF
-
-if (initcond.eq.405)then
-
-  DO I=1,KMAXE
-    IF (DIMENSIONA.EQ.3)THEN
-      IF (U_C(I)%VAL(1,8).GT.0.05D0)THEN
-        IF (IELEM(N,I)%XXC.le.POST1)THEN
-          POST1=IELEM(N,I)%XXC
-          TRAJ1=I
-        END IF
-        IF (((IELEM(N,I)%YYC.LE.0.052).AND.(IELEM(N,I)%YYC.GE.0.048)).and.((IELEM(N,I)%zzC.LE.0.052).AND.(IELEM(N,I)%zzC.GE.0.048)))THEN
-          IF(IELEM(N,I)%XXC.lE.POST2)THEN
-            POST2=IELEM(N,I)%XXC
-            TRAJ2=i
+  IF (INITCOND.EQ.157)THEN
+      pos_l(1:2)=zero
+      pos_g(1:2)=zero
+      DO I=1,KMAXE
+          LEFTV(1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
+          if (dimensiona.eq.3)then
+              CALL CONS2PRIM(N,leftv,MP_PINFl,gammal)
+          else
+              CALL cons2prim(N,leftv,MP_PINFl,gammal)
           end if
-          if (ielem(n,i)%xxc.ge.post3)then
-            post3=ielem(n,i)%xxc
-            traj3=i
+
+          IF ((LEFTV(NOF_VARIABLES)).GT.0.0D0)THEN  !total volume of gas evolution
+              pos_l(2)=pos_l(2)+(LEFTV(NOF_VARIABLES))*ielem(n,i)%totvolume
           end if
-        END IF
-      END IF
-    ELSE
-      IF (U_C(I)%VAL(1,7).GT.0.4D0)THEN
-        IF (IELEM(N,I)%XXC.LE.POST1)THEN
-          POST1=IELEM(N,I)%XXC
-          TRAJ1=I
-        END IF
-        IF (((IELEM(N,I)%YYC.LE.0.055).AND.(IELEM(N,I)%YYC.GE.0.045)))THEN
-          IF(IELEM(N,I)%XXC.LE.POST2)THEN
-            POST2=IELEM(N,I)%XXC
-            TRAJ2=i
+          IF (LEFTV(num_Vg).GT.pos_l(1))THEN  !total volume of gas evolution
+              pos_l(1)=MAX(pos_l(1),LEFTV(num_Vg))
           end if
-          if (ielem(n,i)%xxc.GE.post3)then
-            post3=ielem(n,i)%xxc
-            traj3=i
+      END Do
+      !find position globally
+      CALL MPI_ALLREDUCE(pos_l(1),pos_g(1),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
+      CALL MPI_ALLREDUCE(pos_l(2),pos_g(2),1,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IERROR)
+
+      IF (n.eq.0)THEN
+          OPEN(70,FILE='Volumex.DAT',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
+          WRITE(70,'(E14.7,1X,E14.7,1X,E14.7)')T,POS_G(1),POS_G(2)
+          close(70)
+      END IF
+
+      CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
+  END IF
+
+  IF (INITCOND.EQ.430)THEN
+      pos_l(1:2)=zero
+      pos_g(1:2)=zero
+      DO I=1,KMAXE
+          IF (U_C(I)%VAL(1,7).GT.0.1D0)THEN   !VOLUME FRACTION OF GAS to be used for lowest location tracking
+              IF (IELEM(N,I)%YYC.Le.POST3)THEN
+                  POST3=IELEM(N,I)%YYC
+                  TRAJ1=I
+              END IF
+          END IF   
+          IF (U_C(I)%VAL(1,7).GT.0.0D0)THEN  !total volume of gas evolution
+              pos_l(2)=pos_l(2)+U_C(I)%VAL(1,7)*ielem(n,i)%totvolume
           end if
-        END IF
-      END IF
-    END IF
-  END DO
+      END Do
 
-  pos_l(1)=post1
-  pos_l(2)=post2
-  pos_l(3)=post3
+      pos_l(1)=post3  !lowest position in my local  cpu
 
-  CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
-    
-  CALL MPI_ALLREDUCE(pos_l(1:2),pos_g(1:2),2,MPI_DOUBLE_PRECISION,MPI_MIN,MPI_COMM_WORLD,IERROR)
+      !find position globally
+      CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
+      CALL MPI_ALLREDUCE(pos_l(1),pos_g(1),1,MPI_DOUBLE_PRECISION,MPI_min,MPI_COMM_WORLD,IERROR)
 
-  !NOW SELECT WHICH CPU HAS THE SMALLEST
-  writeid=100000000
-  writeconf=-1
-  IF (ABS(POS_G(1)-POS_L(1)).LE.TOLSMALL/1000)THEN
-    IF (TRAJ1.GT.0)THEN
-      writeid=n
-    END IF
-  end if
-  !AND IF MORE THAN ONE, SELECT THE SMALLEST ID ONE
-
-  !IF (TRAJ1.GT.0)THEN
-  CALL MPI_ALLREDUCE(writeid,writeconf,1,MPI_INTEGER,MPI_min,MPI_COMM_WORLD,IERROR)
-  !END IF
-
-  if (writeid.EQ.writeconf)then
-    IF (traj1.gt.0)then
-      leftv(1:nof_Variables)=U_C(TRAJ1)%VAL(1,1:nof_Variables)
-
-      IF (DIMENSIONA.EQ.3)THEN
-        CALL CONS2PRIM(N,leftv,MP_PINFl,gammal)
-        OPEN(70,FILE='pos1.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
-        WRITE(70,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POS_G(1),LEFTV(1),LEFTV(2),LEFTV(3),LEFTV(4),LEFTV(5),LEFTV(6),LEFTV(7),LEFTV(8)
-        close(70)
-      ELSE
-        CALL cons2prim(N,leftv,MP_PINFl,gammal)
-        OPEN(70,FILE='pos1.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
-        WRITE(70,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POS_G(1),LEFTV(1),LEFTV(2),LEFTV(3),LEFTV(4),LEFTV(5),LEFTV(6),LEFTV(7)
-        close(70)
-      END IF
-    end if
-  END IF
-
-  writeid=100000000
-  writeconf=-1
-  IF (ABS(POS_G(2)-POS_L(2)).LE.TOLSMALL/1000)THEN
-    IF (TRAJ2.GT.0)THEN
-      writeid=n
-    END IF
-  end if
-
-  !IF (TRAJ2.GT.0)THEN
-  CALL MPI_ALLREDUCE(writeid,writeconf,1,MPI_INTEGER,MPI_min,MPI_COMM_WORLD,IERROR)
-  !END IF
-
-  if (writeid.EQ.writeconf)then
-    if (traj2.gt.0)then
-      leftv(1:nof_Variables)=U_C(TRAJ2)%VAL(1,1:nof_Variables)
-
-      IF (DIMENSIONA.EQ.3)THEN
-        CALL CONS2PRIM(N,leftv,MP_PINFl,gammal)
-
-        OPEN(71,FILE='pos2.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
-        WRITE(71,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POS_G(2),LEFTV(1),LEFTV(2),LEFTV(3),LEFTV(4),LEFTV(5),LEFTV(6),LEFTV(7),LEFTV(8)
-        close(71)
-      Else
-        CALL cons2prim(N,leftv,MP_PINFl,gammal)
-
-        OPEN(70,FILE='pos2.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
-        WRITE(70,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POS_G(2),LEFTV(1),LEFTV(2),LEFTV(3),LEFTV(4),LEFTV(5),LEFTV(6),LEFTV(7)
-        close(70)
-      END IF
-    end if
-  END IF
-
-  CALL MPI_ALLREDUCE(pos_l(3),pos_g(3),1,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IERROR)
-
-  writeid=100000000
-  writeconf=-1
-  IF (ABS(POS_G(3)-POS_L(3)).LE.TOLSMALL/1000)THEN
-    IF (TRAJ3.GT.0)THEN
-      writeid=n
-    END IF
-  end if
-
-  !IF (TRAJ3.GT.0)THEN
-  CALL MPI_ALLREDUCE(writeid,writeconf,1,MPI_INTEGER,MPI_min,MPI_COMM_WORLD,IERROR)
-  !END IF
-
-  if (writeid.EQ.writeconf)then
-    if (traj3.gt.0)then
-      leftv(1:nof_Variables)=U_C(TRAJ3)%VAL(1,1:nof_Variables)
-      IF (DIMENSIONA.EQ.3)THEN
-        CALL CONS2PRIM(N,leftv,MP_PINFl,gammal)
-
-        OPEN(71,FILE='pos3.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
-        WRITE(71,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POS_G(3),LEFTV(1),LEFTV(2),LEFTV(3),LEFTV(4),LEFTV(5),LEFTV(6),LEFTV(7),LEFTV(8)
-        close(71)
-      Else
-        CALL cons2prim(N,leftv,MP_PINFl,gammal)
-
-        OPEN(70,FILE='pos3.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
-        WRITE(70,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POS_G(3),LEFTV(1),LEFTV(2),LEFTV(3),LEFTV(4),LEFTV(5),LEFTV(6),LEFTV(7)
-        close(70)
-      END IF
-    end if
-  END IF
-
-  CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
-end if
-
-if ((initcond.eq.408).or.(initcond.eq.422))then
-  pos_l(1:2)=zero
-  pos_g(1:2)=zero
-
-  DO I=1,KMAXE
-    IF (U_C(I)%VAL(1,8).GT.0.0D0)THEN
-        pos_l(1)=pos_l(1)+ielem(n,i)%totvolume
-        pos_l(2)=pos_l(2)+U_C(I)%VAL(1,8)*ielem(n,i)%totvolume
-    end if
-  END DO
-
-  CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
-    
-  CALL MPI_ALLREDUCE(pos_l(1:2),pos_g(1:2),2,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
-
-  IF (n.eq.0)THEN
-    OPEN(70,FILE='volume.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
-    WRITE(70,'(E14.7,1X,E14.7,1X,E14.7)')T,POS_G(1),pos_g(2)
-    close(70)
-  END IF
-
-  CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
-
-end if
-
-if ((initcond.eq.411).or.(initcond.eq.444))then
-
-  pos_l(1:3)=zero
-  pos_g(1:3)=zero
-
-  DO I=1,KMAXE
-    leftv(1:nof_variables)=U_C(I)%VAL(1,1:nof_Variables)
-    IF (DIMENSIONA.EQ.2)THEN
-      call cons2prim(N,leftv,MP_PINFl,gammal)
-      pos_l(3)=max(abs(leftv(4)),pos_l(3))
-
-      IF (U_C(I)%VAL(1,7).GT.0.0D0)THEN
-        pos_l(1)=pos_l(1)+ielem(n,i)%totvolume
-        pos_l(2)=pos_l(2)+U_C(I)%VAL(1,7)*ielem(n,i)%totvolume
+      !NOW SELECT WHICH CPU HAS THE SMALLEST
+      writeid=100000000
+      IF (ABS(POS_G(1)-POS_L(1)).LE.TOLSMALL/1000)THEN
+          IF (TRAJ1.GT.0)THEN
+            writeid=n
+          END IF
       end if
-    ELSE
-      call CONS2PRIM(N,leftv,MP_PINFl,gammal)
-      pos_l(3)=max(abs(leftv(5)),pos_l(3))
+      !AND IF MORE THAN ONE, SELECT THE SMALLEST ID ONE
+      call mpi_barrier(mpi_comm_world,ierror)
+      CALL MPI_ALLREDUCE(writeid,writeconf,1,MPI_INTEGER,MPI_min,MPI_COMM_WORLD,IERROR)
 
-      IF (U_C(I)%VAL(1,8).GT.0.0D0)THEN
-        pos_l(1)=pos_l(1)+ielem(n,i)%totvolume
-        pos_l(2)=pos_l(2)+U_C(I)%VAL(1,7)*ielem(n,i)%totvolume
+      if (writeid.EQ.writeconf)then
+          leftv(1:nof_Variables)=U_C(TRAJ1)%VAL(1,1:nof_Variables)
+          CALL cons2prim(N,leftv,MP_PINFl,gammal)
+
+          OPEN(70,FILE='position.DAT',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
+          WRITE(70,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POS_G(1),LEFTV(1),LEFTV(2),LEFTV(3),LEFTV(4),LEFTV(5),LEFTV(6),LEFTV(7)
+          close(70)
+          !the CPU that holds this cell will write its position
       end if
-    END IF
-  END DO
 
-  CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
-    
-  CALL MPI_ALLREDUCE(pos_l(1:2),pos_g(1:2),2,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
+      CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
+      CALL MPI_ALLREDUCE(pos_l(2:2),pos_g(2:2),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
 
-  CALL MPI_ALLREDUCE(pos_l(3),pos_g(3),1,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IERROR)
+      IF (n.eq.0)THEN
+          OPEN(70,FILE='volume.DAT',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
+          WRITE(70,'(E14.7,1X,E14.7,1X,E14.7)')T,POS_G(2)
+          close(70)
+      END IF
 
-  IF (n.eq.0)THEN 
-    OPEN(70,FILE='volume.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
-    WRITE(70,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POS_G(1),pos_g(2),POS_G(3)
-    close(70)
+      CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
+
   END IF
 
-  CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
+  if (initcond.eq.405)then
 
-end if
+      DO I=1,KMAXE
+          IF (DIMENSIONA.EQ.3)THEN
+              IF (U_C(I)%VAL(1,8).GT.0.05D0)THEN
+                  IF (IELEM(N,I)%XXC.le.POST1)THEN
+                      POST1=IELEM(N,I)%XXC
+                      TRAJ1=I
+                  END IF
+                  IF (((IELEM(N,I)%YYC.LE.0.052).AND.(IELEM(N,I)%YYC.GE.0.048)).and.((IELEM(N,I)%zzC.LE.0.052).AND.(IELEM(N,I)%zzC.GE.0.048)))THEN
+                      IF(IELEM(N,I)%XXC.lE.POST2)THEN
+                          POST2=IELEM(N,I)%XXC
+                          TRAJ2=i
+                      end if
+                      if (ielem(n,i)%xxc.ge.post3)then
+                          post3=ielem(n,i)%xxc
+                          traj3=i
+                      end if
+                  END IF
+              END IF
+          ELSE
+              IF (U_C(I)%VAL(1,7).GT.0.4D0)THEN
+                  IF (IELEM(N,I)%XXC.LE.POST1)THEN
+                      POST1=IELEM(N,I)%XXC
+                      TRAJ1=I
+                  END IF
+                  IF (((IELEM(N,I)%YYC.LE.0.055).AND.(IELEM(N,I)%YYC.GE.0.045)))THEN
+                      IF(IELEM(N,I)%XXC.LE.POST2)THEN
+                          POST2=IELEM(N,I)%XXC
+                          TRAJ2=i
+                      end if
+                      if (ielem(n,i)%xxc.GE.post3)then
+                          post3=ielem(n,i)%xxc
+                          traj3=i
+                      end if
+                  END IF
+              END IF
+          END IF
+      END DO
+
+      pos_l(1)=post1
+      pos_l(2)=post2
+      pos_l(3)=post3
+
+      CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
+      CALL MPI_ALLREDUCE(pos_l(1:2),pos_g(1:2),2,MPI_DOUBLE_PRECISION,MPI_MIN,MPI_COMM_WORLD,IERROR)
+
+      !NOW SELECT WHICH CPU HAS THE SMALLEST
+      writeid=100000000
+      writeconf=-1
+      IF (ABS(POS_G(1)-POS_L(1)).LE.TOLSMALL/1000)THEN
+          IF (TRAJ1.GT.0)THEN
+              writeid=n
+          END IF
+      end if
+      !AND IF MORE THAN ONE, SELECT THE SMALLEST ID ONE
+
+      !IF (TRAJ1.GT.0)THEN
+      CALL MPI_ALLREDUCE(writeid,writeconf,1,MPI_INTEGER,MPI_min,MPI_COMM_WORLD,IERROR)
+      !END IF
+
+      if (writeid.EQ.writeconf)then
+          IF (traj1.gt.0)then
+              leftv(1:nof_Variables)=U_C(TRAJ1)%VAL(1,1:nof_Variables)
+
+              IF (DIMENSIONA.EQ.3)THEN
+                  CALL CONS2PRIM(N,leftv,MP_PINFl,gammal)
+                  OPEN(70,FILE='pos1.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
+                  WRITE(70,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POS_G(1),LEFTV(1),LEFTV(2),LEFTV(3),LEFTV(4),LEFTV(5),LEFTV(6),LEFTV(7),LEFTV(8)
+                  close(70)
+              ELSE
+                  CALL cons2prim(N,leftv,MP_PINFl,gammal)
+                  OPEN(70,FILE='pos1.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
+                  WRITE(70,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POS_G(1),LEFTV(1),LEFTV(2),LEFTV(3),LEFTV(4),LEFTV(5),LEFTV(6),LEFTV(7)
+                  close(70)
+              END IF
+          END IF
+      end if
+
+      writeid=100000000
+      writeconf=-1
+      IF (ABS(POS_G(2)-POS_L(2)).LE.TOLSMALL/1000)THEN
+          IF (TRAJ2.GT.0)THEN
+              writeid=n
+          END IF
+      end if
+
+      !IF (TRAJ2.GT.0)THEN
+      CALL MPI_ALLREDUCE(writeid,writeconf,1,MPI_INTEGER,MPI_min,MPI_COMM_WORLD,IERROR)
+      !END IF
+
+      if (writeid.EQ.writeconf)then
+          if (traj2.gt.0)then
+              leftv(1:nof_Variables)=U_C(TRAJ2)%VAL(1,1:nof_Variables)
+
+              IF (DIMENSIONA.EQ.3)THEN
+                  CALL CONS2PRIM(N,leftv,MP_PINFl,gammal)
+
+                  OPEN(71,FILE='pos2.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
+                  WRITE(71,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POS_G(2),LEFTV(1),LEFTV(2),LEFTV(3),LEFTV(4),LEFTV(5),LEFTV(6),LEFTV(7),LEFTV(8)
+                  close(71)
+              Else
+                  CALL cons2prim(N,leftv,MP_PINFl,gammal)
+
+                  OPEN(70,FILE='pos2.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
+                  WRITE(70,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POS_G(2),LEFTV(1),LEFTV(2),LEFTV(3),LEFTV(4),LEFTV(5),LEFTV(6),LEFTV(7)
+                  close(70)
+              END IF
+          end if
+      END IF
+
+      CALL MPI_ALLREDUCE(pos_l(3),pos_g(3),1,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IERROR)
+
+      writeid=100000000
+      writeconf=-1
+      IF (ABS(POS_G(3)-POS_L(3)).LE.TOLSMALL/1000)THEN
+          IF (TRAJ3.GT.0)THEN
+              writeid=n
+          END IF
+      end if
+
+      !IF (TRAJ3.GT.0)THEN
+      CALL MPI_ALLREDUCE(writeid,writeconf,1,MPI_INTEGER,MPI_min,MPI_COMM_WORLD,IERROR)
+      !END IF
+
+      if (writeid.EQ.writeconf)then
+          if (traj3.gt.0)then
+              leftv(1:nof_Variables)=U_C(TRAJ3)%VAL(1,1:nof_Variables)
+              IF (DIMENSIONA.EQ.3)THEN
+                  CALL CONS2PRIM(N,leftv,MP_PINFl,gammal)
+
+                  OPEN(71,FILE='pos3.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
+                  WRITE(71,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POS_G(3),LEFTV(1),LEFTV(2),LEFTV(3),LEFTV(4),LEFTV(5),LEFTV(6),LEFTV(7),LEFTV(8)
+                  close(71)
+              Else
+                  CALL cons2prim(N,leftv,MP_PINFl,gammal)
+
+                  OPEN(70,FILE='pos3.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
+                  WRITE(70,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POS_G(3),LEFTV(1),LEFTV(2),LEFTV(3),LEFTV(4),LEFTV(5),LEFTV(6),LEFTV(7)
+                  close(70)
+              END IF
+          end if
+      END IF
+
+      CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
+  end if
+
+  if ((initcond.eq.408).or.(initcond.eq.422))then
+      pos_l(1:2)=zero
+      pos_g(1:2)=zero
+
+      DO I=1,KMAXE
+          IF (U_C(I)%VAL(1,8).GT.0.0D0)THEN
+              pos_l(1)=pos_l(1)+ielem(n,i)%totvolume
+              pos_l(2)=pos_l(2)+U_C(I)%VAL(1,8)*ielem(n,i)%totvolume
+          end if
+      END DO
+
+      CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)  
+      CALL MPI_ALLREDUCE(pos_l(1:2),pos_g(1:2),2,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
+
+      IF (n.eq.0)THEN
+          OPEN(70,FILE='volume.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
+          WRITE(70,'(E14.7,1X,E14.7,1X,E14.7)')T,POS_G(1),pos_g(2)
+          close(70)
+      END IF
+
+      CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
+
+  end if
+
+  if ((initcond.eq.411).or.(initcond.eq.444))then
+
+      pos_l(1:3)=zero
+      pos_g(1:3)=zero
+
+      DO I=1,KMAXE
+          leftv(1:nof_variables)=U_C(I)%VAL(1,1:nof_Variables)
+          IF (DIMENSIONA.EQ.2)THEN
+              call cons2prim(N,leftv,MP_PINFl,gammal)
+              pos_l(3)=max(abs(leftv(4)),pos_l(3))
+              IF (U_C(I)%VAL(1,7).GT.0.0D0)THEN
+                  pos_l(1)=pos_l(1)+ielem(n,i)%totvolume
+                  pos_l(2)=pos_l(2)+U_C(I)%VAL(1,7)*ielem(n,i)%totvolume
+              end if
+          ELSE
+              call CONS2PRIM(N,leftv,MP_PINFl,gammal)
+              pos_l(3)=max(abs(leftv(5)),pos_l(3))
+              IF (U_C(I)%VAL(1,8).GT.0.0D0)THEN
+                  pos_l(1)=pos_l(1)+ielem(n,i)%totvolume
+                  pos_l(2)=pos_l(2)+U_C(I)%VAL(1,7)*ielem(n,i)%totvolume
+              end if
+          END IF
+      END DO
+
+      CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)  
+      CALL MPI_ALLREDUCE(pos_l(1:2),pos_g(1:2),2,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
+      CALL MPI_ALLREDUCE(pos_l(3),pos_g(3),1,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IERROR)
+
+      IF (n.eq.0)THEN 
+          OPEN(70,FILE='volume.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
+          WRITE(70,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POS_G(1),pos_g(2),POS_G(3)
+          close(70)
+      END IF
+
+      CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
+
+  end if
 
 END SUBROUTINE
 
@@ -4102,52 +4095,52 @@ END SUBROUTINE
 
 
 SUBROUTINE FLUX2DX(FLUX_TERM_X,LEFTV)
-IMPLICIT NONE
-REAL::P,U,V,W,E,R,S,GM,SKIN,IEN,PI, IE1, MP_STIFF, MP_DENSITY,GAMMAL,GAMMAR
-REAL,DIMENSION(NOF_SPECIES)::MP_AR,MP_IE
-REAL,DIMENSION(1:NOF_VARIABLES),INTENT(IN)::LEFTV
-REAL,DIMENSION(1:NOF_VARIABLES),INTENT(INOUT)::FLUX_TERM_X
+  IMPLICIT NONE
+  REAL::P,U,V,W,E,R,S,GM,SKIN,IEN,PI, IE1, MP_STIFF, MP_DENSITY,GAMMAL,GAMMAR
+  REAL,DIMENSION(NOF_SPECIES)::MP_AR,MP_IE
+  REAL,DIMENSION(1:NOF_VARIABLES),INTENT(IN)::LEFTV
+  REAL,DIMENSION(1:NOF_VARIABLES),INTENT(INOUT)::FLUX_TERM_X
 
-IF(MULTISPECIES.EQ.1)THEN
-  MP_AR(1)=LEFTV(7)/(GAMMA_IN(1)-1.0D0)  
-  MP_AR(2)=(1.0D0-LEFTV(7))/(GAMMA_IN(2)-1.0D0)
-  GAMMAL=(1.0D0/(MP_AR(1)+MP_AR(2)))+1.0D0    !MIXTURE GAMMA ISOBARIC ASSUMPTIO
-  MP_STIFF=((LEFTV(7)*(GAMMA_IN(1)/(GAMMA_IN(1)-1.0D0))*MP_PINF(1))+((1.0D0-LEFTV(7))*(GAMMA_IN(2)/(GAMMA_IN(2)-1.0D0))*MP_PINF(2)))*(GAMMAL-1.0D0)
-  MP_DENSITY = LEFTV(5)+LEFTV(6)
-  
-  R=MP_DENSITY
-  U=LEFTV(2)
-  V=LEFTV(3)
-  P=LEFTV(4)
+  IF(MULTISPECIES.EQ.1)THEN
+      MP_AR(1)=LEFTV(7)/(GAMMA_IN(1)-1.0D0)  
+      MP_AR(2)=(1.0D0-LEFTV(7))/(GAMMA_IN(2)-1.0D0)
+      GAMMAL=(1.0D0/(MP_AR(1)+MP_AR(2)))+1.0D0    !MIXTURE GAMMA ISOBARIC ASSUMPTIO
+      MP_STIFF=((LEFTV(7)*(GAMMA_IN(1)/(GAMMA_IN(1)-1.0D0))*MP_PINF(1))+((1.0D0-LEFTV(7))*(GAMMA_IN(2)/(GAMMA_IN(2)-1.0D0))*MP_PINF(2)))*(GAMMAL-1.0D0)
+      MP_DENSITY = LEFTV(5)+LEFTV(6)
+      
+      R=MP_DENSITY
+      U=LEFTV(2)
+      V=LEFTV(3)
+      P=LEFTV(4)
 
-  !KINETIC ENERGY FIRST!
-  SKIN=(OO2)*((U**2)+(V**2))
-  !INTERNAL ENERGY 
-  IE1=((P+MP_STIFF)/((GAMMAL-1.0D0)*R))
-  !TOTAL ENERGY
-  E=R*(SKIN+IE1)
-  FLUX_TERM_X(1)=R*U
-  FLUX_TERM_X(2)=(R*(U**2))+P
-  FLUX_TERM_X(3)=R*U*V
-  FLUX_TERM_X(4)=U*(E+P)
-  FLUX_TERM_X(5:7)=LEFTV(5:7)*U
-ELSE
-  R=LEFTV(1)
-  U=LEFTV(2)
-  V=LEFTV(3)
-  P=LEFTV(4)
-  GM=GAMMA
-  !KINETIC ENERGY FIRST!
-  SKIN=(OO2)*((U**2)+(V**2))
-  !INTERNAL ENERGY 
-  IEN=((P)/((GM-1.0D0)*R))
-  !TOTAL ENERGY
-  E=R*(SKIN+IEN)
-  FLUX_TERM_X(1)=R*U
-  FLUX_TERM_X(2)=(R*(U**2))+P
-  FLUX_TERM_X(3)=R*U*V
-  FLUX_TERM_X(4)=U*(E+P)
-END IF
+      !KINETIC ENERGY FIRST!
+      SKIN=(OO2)*((U**2)+(V**2))
+      !INTERNAL ENERGY 
+      IE1=((P+MP_STIFF)/((GAMMAL-1.0D0)*R))
+      !TOTAL ENERGY
+      E=R*(SKIN+IE1)
+      FLUX_TERM_X(1)=R*U
+      FLUX_TERM_X(2)=(R*(U**2))+P
+      FLUX_TERM_X(3)=R*U*V
+      FLUX_TERM_X(4)=U*(E+P)
+      FLUX_TERM_X(5:7)=LEFTV(5:7)*U
+  ELSE
+      R=LEFTV(1)
+      U=LEFTV(2)
+      V=LEFTV(3)
+      P=LEFTV(4)
+      GM=GAMMA
+      !KINETIC ENERGY FIRST!
+      SKIN=(OO2)*((U**2)+(V**2))
+      !INTERNAL ENERGY 
+      IEN=((P)/((GM-1.0D0)*R))
+      !TOTAL ENERGY
+      E=R*(SKIN+IEN)
+      FLUX_TERM_X(1)=R*U
+      FLUX_TERM_X(2)=(R*(U**2))+P
+      FLUX_TERM_X(3)=R*U*V
+      FLUX_TERM_X(4)=U*(E+P)
+  END IF
 
 END SUBROUTINE
 
@@ -4156,53 +4149,53 @@ END SUBROUTINE
 
 
 SUBROUTINE FLUX2DY(FLUX_TERM_Y,LEFTV)
-IMPLICIT NONE
-REAL::P,U,V,W,E,R,S,GM,SKIN,IEN,PI, IE1, MP_STIFF, MP_DENSITY,GAMMAL,GAMMAR
-REAL,DIMENSION(NOF_SPECIES)::MP_AR,MP_IE
-REAL,DIMENSION(1:NOF_VARIABLES),INTENT(IN)::LEFTV
-REAL,DIMENSION(1:NOF_VARIABLES),INTENT(INOUT)::FLUX_TERM_Y
+  IMPLICIT NONE
+  REAL::P,U,V,W,E,R,S,GM,SKIN,IEN,PI, IE1, MP_STIFF, MP_DENSITY,GAMMAL,GAMMAR
+  REAL,DIMENSION(NOF_SPECIES)::MP_AR,MP_IE
+  REAL,DIMENSION(1:NOF_VARIABLES),INTENT(IN)::LEFTV
+  REAL,DIMENSION(1:NOF_VARIABLES),INTENT(INOUT)::FLUX_TERM_Y
 
-IF(MULTISPECIES.EQ.1)THEN
-  MP_AR(1)=LEFTV(7)/(GAMMA_IN(1)-1.0D0)  
-  MP_AR(2)=(1.0D0-LEFTV(7))/(GAMMA_IN(2)-1.0D0)
-  GAMMAL=(1.0D0/(MP_AR(1)+MP_AR(2)))+1.0D0    !MIXTURE GAMMA ISOBARIC ASSUMPTIO
-  MP_STIFF=((LEFTV(7)*(GAMMA_IN(1)/(GAMMA_IN(1)-1.0D0))*MP_PINF(1))+((1.0D0-LEFTV(7))*(GAMMA_IN(2)/(GAMMA_IN(2)-1.0D0))*MP_PINF(2)))*(GAMMAL-1.0D0)
-  MP_DENSITY = LEFTV(5)+LEFTV(6)
-  
-  R=MP_DENSITY
-  U=LEFTV(2)
-  V=LEFTV(3)
-  P=LEFTV(4)
+  IF(MULTISPECIES.EQ.1)THEN
+      MP_AR(1)=LEFTV(7)/(GAMMA_IN(1)-1.0D0)  
+      MP_AR(2)=(1.0D0-LEFTV(7))/(GAMMA_IN(2)-1.0D0)
+      GAMMAL=(1.0D0/(MP_AR(1)+MP_AR(2)))+1.0D0    !MIXTURE GAMMA ISOBARIC ASSUMPTIO
+      MP_STIFF=((LEFTV(7)*(GAMMA_IN(1)/(GAMMA_IN(1)-1.0D0))*MP_PINF(1))+((1.0D0-LEFTV(7))*(GAMMA_IN(2)/(GAMMA_IN(2)-1.0D0))*MP_PINF(2)))*(GAMMAL-1.0D0)
+      MP_DENSITY = LEFTV(5)+LEFTV(6)
+      R=MP_DENSITY
 
-  !KINETIC ENERGY FIRST!
-  SKIN=(OO2)*((U**2)+(V**2))
-  !INTERNAL ENERGY 
-  IE1=((P+MP_STIFF)/((GAMMAL-1.0D0)*R))
-  !TOTAL ENERGY
-  E=R*(SKIN+IE1)
-  FLUX_TERM_Y(1)=R*V
-  FLUX_TERM_Y(2)=R*U*V
-  FLUX_TERM_Y(3)=(R*(V**2))+P
-  FLUX_TERM_Y(4)=V*(E+P)
-  FLUX_TERM_Y(5:7)=LEFTV(5:7)*V
-ELSE
-  R=LEFTV(1)
-  U=LEFTV(2)
-  V=LEFTV(3)
-  P=LEFTV(4)
-  GM=GAMMA
-  !KINETIC ENERGY FIRST!
-  SKIN=(OO2)*((U**2)+(V**2))
-  !INTERNAL ENERGY
-  IEN=((P)/((GM-1.0D0)*R))
-  !TOTAL ENERGY
-  E=R*(SKIN+IEN)
+      U=LEFTV(2)
+      V=LEFTV(3)
+      P=LEFTV(4)
 
-  FLUX_TERM_Y(1)=R*v
-  FLUX_TERM_Y(2)=R*u*v
-  FLUX_TERM_Y(3)=(R*v*v)+P
-  FLUX_TERM_Y(4)=v*(E+P)
-ENDIF
+      !KINETIC ENERGY FIRST!
+      SKIN=(OO2)*((U**2)+(V**2))
+      !INTERNAL ENERGY 
+      IE1=((P+MP_STIFF)/((GAMMAL-1.0D0)*R))
+      !TOTAL ENERGY
+      E=R*(SKIN+IE1)
+      FLUX_TERM_Y(1)=R*V
+      FLUX_TERM_Y(2)=R*U*V
+      FLUX_TERM_Y(3)=(R*(V**2))+P
+      FLUX_TERM_Y(4)=V*(E+P)
+      FLUX_TERM_Y(5:7)=LEFTV(5:7)*V
+  ELSE
+      R=LEFTV(1)
+      U=LEFTV(2)
+      V=LEFTV(3)
+      P=LEFTV(4)
+      GM=GAMMA
+      !KINETIC ENERGY FIRST!
+      SKIN=(OO2)*((U**2)+(V**2))
+      !INTERNAL ENERGY
+      IEN=((P)/((GM-1.0D0)*R))
+      !TOTAL ENERGY
+      E=R*(SKIN+IEN)
+
+      FLUX_TERM_Y(1)=R*v
+      FLUX_TERM_Y(2)=R*u*v
+      FLUX_TERM_Y(3)=(R*v*v)+P
+      FLUX_TERM_Y(4)=v*(E+P)
+  ENDIF
 
 END subroutine
 
@@ -4211,59 +4204,58 @@ END subroutine
 
 
 SUBROUTINE FLUX3Dx(FLUX_TERM_X,LEFTV)
-IMPLICIT NONE
-REAL::P,U,V,W,E,R,S,GM,SKIN,IEN,PI,IE1,MP_STIFF,MP_DENSITY,GAMMAL,GAMMAR
-REAL,DIMENSION(NOF_SPECIES)::MP_AR,MP_IE
-REAL,DIMENSION(1:NOF_VARIABLES),INTENT(IN)::LEFTV
-REAL,DIMENSION(1:NOF_VARIABLES),INTENT(INOUT)::FLUX_TERM_X
+  IMPLICIT NONE
+  REAL::P,U,V,W,E,R,S,GM,SKIN,IEN,PI,IE1,MP_STIFF,MP_DENSITY,GAMMAL,GAMMAR
+  REAL,DIMENSION(NOF_SPECIES)::MP_AR,MP_IE
+  REAL,DIMENSION(1:NOF_VARIABLES),INTENT(IN)::LEFTV
+  REAL,DIMENSION(1:NOF_VARIABLES),INTENT(INOUT)::FLUX_TERM_X
 
-IF(MULTISPECIES.EQ.1)THEN
-  MP_AR(1)=LEFTV(8)/(GAMMA_IN(1)-1.0D0)
-  MP_AR(2)=(1.0D0-LEFTV(8))/(GAMMA_IN(2)-1.0D0)
-  GAMMAL=(1.0D0/(MP_AR(1)+MP_AR(2)))+1.0D0    !MIXTURE GAMMA ISOBARIC ASSUMPTIO
-  MP_STIFF=((LEFTV(8)*(GAMMA_IN(1)/(GAMMA_IN(1)-1.0D0))*MP_PINF(1))+((1.0D0-LEFTV(8))*(GAMMA_IN(2)/(GAMMA_IN(2)-1.0D0))*MP_PINF(2)))*(GAMMAL-1.0D0)
+  IF(MULTISPECIES.EQ.1)THEN
+      MP_AR(1)=LEFTV(8)/(GAMMA_IN(1)-1.0D0)
+      MP_AR(2)=(1.0D0-LEFTV(8))/(GAMMA_IN(2)-1.0D0)
+      GAMMAL=(1.0D0/(MP_AR(1)+MP_AR(2)))+1.0D0    !MIXTURE GAMMA ISOBARIC ASSUMPTIO
+      MP_STIFF=((LEFTV(8)*(GAMMA_IN(1)/(GAMMA_IN(1)-1.0D0))*MP_PINF(1))+((1.0D0-LEFTV(8))*(GAMMA_IN(2)/(GAMMA_IN(2)-1.0D0))*MP_PINF(2)))*(GAMMAL-1.0D0)
 
-  MP_DENSITY = LEFTV(6)+LEFTV(7)
+      MP_DENSITY = LEFTV(6)+LEFTV(7)
+      R=MP_DENSITY
 
-  R=MP_DENSITY
+      U=LEFTV(2)
+      V=LEFTV(3)
+      W=LEFTV(4)
+      P=LEFTV(5)
 
-  U=LEFTV(2)
-  V=LEFTV(3)
-  W=LEFTV(4)
-  P=LEFTV(5)
+      !KINETIC ENERGY FIRST!
+      SKIN=(OO2)*((U**2)+(V**2)+(W**2))
+      !INTERNAL ENERGY
+      IE1=((P+MP_stiff)/((GAMMAL-1.0D0)*R))
+      !TOTAL ENERGY
+      E=R*(SKIN+IE1)
+      FLUX_TERM_X(1)=R*U
+      FLUX_TERM_X(2)=(R*(U**2))+P
+      FLUX_TERM_X(3)=R*U*V
+      FLUX_TERM_X(4)=R*U*W
+      FLUX_TERM_X(5)=U*(E+P)
+      FLUX_TERM_X(6:8)=LEFTV(6:8)*U
+  ELSE
+      R=LEFTV(1)
+      U=LEFTV(2)
+      V=LEFTV(3)
+      w=LEFTV(4)
+      P=LEFTV(5)
+      GM=GAMMA
+      !KINETIC ENERGY FIRST!
+      SKIN=(OO2)*((U**2)+(V**2)+(W**2))
+      !INTERNAL ENERGY 
+      IEN=((P)/((GM-1.0D0)*R))
+      !TOTAL ENERGY
+      E=R*(SKIN+IEN)
 
-  !KINETIC ENERGY FIRST!
-  SKIN=(OO2)*((U**2)+(V**2)+(W**2))
-  !INTERNAL ENERGY
-  IE1=((P+MP_stiff)/((GAMMAL-1.0D0)*R))
-  !TOTAL ENERGY
-  E=R*(SKIN+IE1)
-  FLUX_TERM_X(1)=R*U
-  FLUX_TERM_X(2)=(R*(U**2))+P
-  FLUX_TERM_X(3)=R*U*V
-  FLUX_TERM_X(4)=R*U*W
-  FLUX_TERM_X(5)=U*(E+P)
-  FLUX_TERM_X(6:8)=LEFTV(6:8)*U
-ELSE
-  R=LEFTV(1)
-  U=LEFTV(2)
-  V=LEFTV(3)
-  w=LEFTV(4)
-  P=LEFTV(5)
-  GM=GAMMA
-  !KINETIC ENERGY FIRST!
-  SKIN=(OO2)*((U**2)+(V**2)+(W**2))
-  !INTERNAL ENERGY 
-  IEN=((P)/((GM-1.0D0)*R))
-  !TOTAL ENERGY
-  E=R*(SKIN+IEN)
-
-  FLUX_TERM_X(1)=R*U
-  FLUX_TERM_X(2)=(R*(U**2))+P
-  FLUX_TERM_X(3)=R*U*V
-  FLUX_TERM_X(4)=R*U*W
-  FLUX_TERM_X(5)=U*(E+P)
-end if
+      FLUX_TERM_X(1)=R*U
+      FLUX_TERM_X(2)=(R*(U**2))+P
+      FLUX_TERM_X(3)=R*U*V
+      FLUX_TERM_X(4)=R*U*W
+      FLUX_TERM_X(5)=U*(E+P)
+  end if
 
 END SUBROUTINE
 
@@ -4332,58 +4324,58 @@ END SUBROUTINE
 
 
 SUBROUTINE FLUX3DZ(FLUX_TERM_Z,LEFTV)
-IMPLICIT NONE
-REAL::P,U,V,W,E,R,S,GM,SKIN,IEN,PI,IE1, MP_STIFF,MP_DENSITY,GAMMAL,GAMMAR
-REAL,DIMENSION(NOF_SPECIES)::MP_AR,MP_IE
-REAL,DIMENSION(1:NOF_VARIABLES),INTENT(IN)::LEFTV
-REAL,DIMENSION(1:NOF_VARIABLES),INTENT(INOUT)::FLUX_TERM_Z
+  IMPLICIT NONE
+  REAL::P,U,V,W,E,R,S,GM,SKIN,IEN,PI,IE1, MP_STIFF,MP_DENSITY,GAMMAL,GAMMAR
+  REAL,DIMENSION(NOF_SPECIES)::MP_AR,MP_IE
+  REAL,DIMENSION(1:NOF_VARIABLES),INTENT(IN)::LEFTV
+  REAL,DIMENSION(1:NOF_VARIABLES),INTENT(INOUT)::FLUX_TERM_Z
 
-IF(MULTISPECIES.EQ.1)THEN
-  MP_AR(1)=LEFTV(8)/(GAMMA_IN(1)-1.0D0)
-  MP_AR(2)=(1.0D0-LEFTV(8))/(GAMMA_IN(2)-1.0D0)
-  GAMMAL=(1.0D0/(MP_AR(1)+MP_AR(2)))+1.0D0    !MIXTURE GAMMA ISOBARIC ASSUMPTIO
-  MP_STIFF=((LEFTV(8)*(GAMMA_IN(1)/(GAMMA_IN(1)-1.0D0))*MP_PINF(1))+((1.0D0-LEFTV(8))*(GAMMA_IN(2)/(GAMMA_IN(2)-1.0D0))*MP_PINF(2)))*(GAMMAL-1.0D0)
+  IF(MULTISPECIES.EQ.1)THEN
+      MP_AR(1)=LEFTV(8)/(GAMMA_IN(1)-1.0D0)
+      MP_AR(2)=(1.0D0-LEFTV(8))/(GAMMA_IN(2)-1.0D0)
+      GAMMAL=(1.0D0/(MP_AR(1)+MP_AR(2)))+1.0D0    !MIXTURE GAMMA ISOBARIC ASSUMPTIO
+      MP_STIFF=((LEFTV(8)*(GAMMA_IN(1)/(GAMMA_IN(1)-1.0D0))*MP_PINF(1))+((1.0D0-LEFTV(8))*(GAMMA_IN(2)/(GAMMA_IN(2)-1.0D0))*MP_PINF(2)))*(GAMMAL-1.0D0)
 
-  MP_DENSITY = LEFTV(6)+LEFTV(7)
+      MP_DENSITY = LEFTV(6)+LEFTV(7)
 
-  R=MP_DENSITY
-  U=LEFTV(2)
-  V=LEFTV(3)
-  W=LEFTV(4)
-  P=LEFTV(5)
+      R=MP_DENSITY
+      U=LEFTV(2)
+      V=LEFTV(3)
+      W=LEFTV(4)
+      P=LEFTV(5)
 
-  !KINETIC ENERGY FIRST!
-  SKIN=(OO2)*((U**2)+(V**2)+(W**2))
-  !INTERNAL ENERGY
-  IE1=((P+MP_stiff)/((GAMMAL-1.0D0)*R))
-  !TOTAL ENERGY
-  E=R*(SKIN+IE1)
-  FLUX_TERM_Z(1)=R*W
-  FLUX_TERM_Z(2)=R*U*W
-  FLUX_TERM_Z(3)=R*V*W
-  FLUX_TERM_Z(4)=(R*(W*W))+p
-  FLUX_TERM_Z(5)=W*(E+P)
-  FLUX_TERM_Z(6:8)=LEFTV(6:8)*W
-ELSE
-  R=LEFTV(1)
-  U=LEFTV(2)
-  V=LEFTV(3)
-  w=LEFTV(4)
-  P=LEFTV(5)
-  GM=GAMMA
-  !KINETIC ENERGY FIRST!
-  SKIN=(OO2)*((U**2)+(V**2)+(W**2))
-  !INTERNAL ENERGY 
-  IEN=((P)/((GM-1.0D0)*R))
-  !TOTAL ENERGY
-  E=R*(SKIN+IEN)
+      !KINETIC ENERGY FIRST!
+      SKIN=(OO2)*((U**2)+(V**2)+(W**2))
+      !INTERNAL ENERGY
+      IE1=((P+MP_stiff)/((GAMMAL-1.0D0)*R))
+      !TOTAL ENERGY
+      E=R*(SKIN+IE1)
+      FLUX_TERM_Z(1)=R*W
+      FLUX_TERM_Z(2)=R*U*W
+      FLUX_TERM_Z(3)=R*V*W
+      FLUX_TERM_Z(4)=(R*(W*W))+p
+      FLUX_TERM_Z(5)=W*(E+P)
+      FLUX_TERM_Z(6:8)=LEFTV(6:8)*W
+  ELSE
+      R=LEFTV(1)
+      U=LEFTV(2)
+      V=LEFTV(3)
+      w=LEFTV(4)
+      P=LEFTV(5)
+      GM=GAMMA
+      !KINETIC ENERGY FIRST!
+      SKIN=(OO2)*((U**2)+(V**2)+(W**2))
+      !INTERNAL ENERGY 
+      IEN=((P)/((GM-1.0D0)*R))
+      !TOTAL ENERGY
+      E=R*(SKIN+IEN)
 
-  FLUX_TERM_Z(1)=R*w
-  FLUX_TERM_Z(2)=r*u*w
-  FLUX_TERM_Z(3)=R*v*w
-  FLUX_TERM_Z(4)=(R*(w**2))+P
-  FLUX_TERM_Z(5)=w*(E+P)
-END IF
+      FLUX_TERM_Z(1)=R*w
+      FLUX_TERM_Z(2)=r*u*w
+      FLUX_TERM_Z(3)=R*v*w
+      FLUX_TERM_Z(4)=(R*(w**2))+P
+      FLUX_TERM_Z(5)=w*(E+P)
+  END IF
 END SUBROUTINE
 
 
@@ -4392,34 +4384,34 @@ END SUBROUTINE
 
 
 SUBROUTINE FLUX_VISC2D(FLUX_TERM_X,FLUX_TERM_Y,LEFTV,LEFTV_DER)
-IMPLICIT NONE
-REAL:: U, V, UX, UY, VX, VY, TX, TY, TAUXX, TAUXY, TAUYY
-REAL,DIMENSION(1:NOF_VARIABLES),INTENT(IN)::LEFTV
-REAL,DIMENSION(1:NOF_VARIABLES),INTENT(INOUT)::FLUX_TERM_X,FLUX_TERM_Y
-REAL,DIMENSION(1:4)::VISCL,LAML
-REAL,DIMENSION(1:NOF_VARIABLES,1:DIMENSIONA),INTENT(IN)::LEFTV_DER
+  IMPLICIT NONE
+  REAL:: U, V, UX, UY, VX, VY, TX, TY, TAUXX, TAUXY, TAUYY
+  REAL,DIMENSION(1:NOF_VARIABLES),INTENT(IN)::LEFTV
+  REAL,DIMENSION(1:NOF_VARIABLES),INTENT(INOUT)::FLUX_TERM_X,FLUX_TERM_Y
+  REAL,DIMENSION(1:4)::VISCL,LAML
+  REAL,DIMENSION(1:NOF_VARIABLES,1:DIMENSIONA),INTENT(IN)::LEFTV_DER
 
-CALL SUTHERLAND2D(N, LEFTV, LEFTV,VISCL,LAML)
+  CALL SUTHERLAND2D(N, LEFTV, LEFTV,VISCL,LAML)
 
-U = LEFTV(2)
-V = LEFTV(3)
-UX = LEFTV_DER(2,1)
-UY = LEFTV_DER(2,2)
-VX = LEFTV_DER(3,1)
-VY = LEFTV_DER(3,2)
-TX = LEFTV_DER(4,1)
-TY = LEFTV_DER(4,2)
+  U = LEFTV(2)
+  V = LEFTV(3)
+  UX = LEFTV_DER(2,1)
+  UY = LEFTV_DER(2,2)
+  VX = LEFTV_DER(3,1)
+  VY = LEFTV_DER(3,2)
+  TX = LEFTV_DER(4,1)
+  TY = LEFTV_DER(4,2)
 
-TAUXX = 2.0D0 / 3.0D0 * VISCL(1) * (2 * UX - VY)
-TAUYY = 2.0D0 / 3.0D0 * VISCL(1) * (2 * VY - UX)
-TAUXY = VISCL(1) * (UY + VX)
+  TAUXX = 2.0D0 / 3.0D0 * VISCL(1) * (2 * UX - VY)
+  TAUYY = 2.0D0 / 3.0D0 * VISCL(1) * (2 * VY - UX)
+  TAUXY = VISCL(1) * (UY + VX)
 
-FLUX_TERM_X(2) = FLUX_TERM_X(2) - TAUXX
-FLUX_TERM_X(3) = FLUX_TERM_X(3) - TAUXY
-FLUX_TERM_X(4) = FLUX_TERM_X(4) - (U * TAUXX + V * TAUXY + LAML(1) * TX)
-FLUX_TERM_Y(2) = FLUX_TERM_Y(2) - TAUXY
-FLUX_TERM_Y(3) = FLUX_TERM_Y(3) - TAUYY
-FLUX_TERM_Y(4) = FLUX_TERM_Y(4) - (U * TAUXY + V * TAUYY + LAML(1) * TY)
+  FLUX_TERM_X(2) = FLUX_TERM_X(2) - TAUXX
+  FLUX_TERM_X(3) = FLUX_TERM_X(3) - TAUXY
+  FLUX_TERM_X(4) = FLUX_TERM_X(4) - (U * TAUXX + V * TAUXY + LAML(1) * TX)
+  FLUX_TERM_Y(2) = FLUX_TERM_Y(2) - TAUXY
+  FLUX_TERM_Y(3) = FLUX_TERM_Y(3) - TAUYY
+  FLUX_TERM_Y(4) = FLUX_TERM_Y(4) - (U * TAUXY + V * TAUYY + LAML(1) * TY)
 
 END SUBROUTINE
 
@@ -4428,58 +4420,58 @@ END SUBROUTINE
 
 
 SUBROUTINE FLUX_VISC3D(FLUX_TERM_X,FLUX_TERM_Y,FLUX_TERM_Z,LEFTV,LEFTV_DER)
-IMPLICIT NONE
-REAL:: U, V, UX, UY, VX, VY, TX, TY, TAUXX, TAUXY, TAUYY, W, UZ, VZ, WX, WY, WZ, TZ, TAUXZ, TAUYZ, TAUZZ
-REAL,DIMENSION(1:NOF_VARIABLES),INTENT(IN)::LEFTV
-REAL,DIMENSION(1:NOF_VARIABLES),INTENT(INOUT)::FLUX_TERM_X,FLUX_TERM_Y,FLUX_TERM_Z
-REAL,DIMENSION(1:NOF_VARIABLES,1:DIMENSIONA),INTENT(IN)::LEFTV_DER
-REAL,DIMENSION(1:4)::VISCL,LAML
+  IMPLICIT NONE
+  REAL:: U, V, UX, UY, VX, VY, TX, TY, TAUXX, TAUXY, TAUYY, W, UZ, VZ, WX, WY, WZ, TZ, TAUXZ, TAUYZ, TAUZZ
+  REAL,DIMENSION(1:NOF_VARIABLES),INTENT(IN)::LEFTV
+  REAL,DIMENSION(1:NOF_VARIABLES),INTENT(INOUT)::FLUX_TERM_X,FLUX_TERM_Y,FLUX_TERM_Z
+  REAL,DIMENSION(1:NOF_VARIABLES,1:DIMENSIONA),INTENT(IN)::LEFTV_DER
+  REAL,DIMENSION(1:4)::VISCL,LAML
 
-CALL SUTHERLAND(N, LEFTV, LEFTV,VISCL,LAML)
+  CALL SUTHERLAND(N, LEFTV, LEFTV,VISCL,LAML)
 
-! Variables extrapolated at boundary
-       U = LEFTV(2)
-       V = LEFTV(3)
-       W = LEFTV(4)
+  ! Variables extrapolated at boundary
+  U = LEFTV(2)
+  V = LEFTV(3)
+  W = LEFTV(4)
 
-      UX = LEFTV_DER(2,1)
-      UY = LEFTV_DER(2,2)
-      UZ = LEFTV_DER(2,3)
+  UX = LEFTV_DER(2,1)
+  UY = LEFTV_DER(2,2)
+  UZ = LEFTV_DER(2,3)
 
-      VX = LEFTV_DER(3,1)
-      VY = LEFTV_DER(3,2)
-      VZ = LEFTV_DER(3,3)
+  VX = LEFTV_DER(3,1)
+  VY = LEFTV_DER(3,2)
+  VZ = LEFTV_DER(3,3)
 
-      WX = LEFTV_DER(4,1)
-      WY = LEFTV_DER(4,2)
-      WZ = LEFTV_DER(4,3)
+  WX = LEFTV_DER(4,1)
+  WY = LEFTV_DER(4,2)
+  WZ = LEFTV_DER(4,3)
 
-      TX = LEFTV_DER(5,1)
-      TY = LEFTV_DER(5,2)
-      TZ = LEFTV_DER(5,3)
+  TX = LEFTV_DER(5,1)
+  TY = LEFTV_DER(5,2)
+  TZ = LEFTV_DER(5,3)
 
-    TAUXX = 2.0D0 / 3.0D0 * VISCL(1) * (2 * UX - VY - WZ)
-    TAUYY = 2.0D0 / 3.0D0 * VISCL(1) * (2 * VY - UX - WZ)
-    TAUXY = VISCL(1) * (UY + VX)
+  TAUXX = 2.0D0 / 3.0D0 * VISCL(1) * (2 * UX - VY - WZ)
+  TAUYY = 2.0D0 / 3.0D0 * VISCL(1) * (2 * VY - UX - WZ)
+  TAUXY = VISCL(1) * (UY + VX)
 
-    TAUXZ = VISCL(1) * (UZ + WX)
-    TAUYZ = VISCL(1) * (WY + VZ)
-    TAUZZ = 2.0D0 / 3.0D0 * VISCL(1) * (2 * WZ - UX - VY)
+  TAUXZ = VISCL(1) * (UZ + WX)
+  TAUYZ = VISCL(1) * (WY + VZ)
+  TAUZZ = 2.0D0 / 3.0D0 * VISCL(1) * (2 * WZ - UX - VY)
 
-    FLUX_TERM_X(2) = FLUX_TERM_X(2) - TAUXX
-    FLUX_TERM_X(3) = FLUX_TERM_X(3) - TAUXY
-    FLUX_TERM_X(4) = FLUX_TERM_X(4) - TAUXZ
-    FLUX_TERM_X(5) = FLUX_TERM_X(5) - (U * TAUXX + V * TAUXY + W * TAUXZ + LAML(1) * TX)
+  FLUX_TERM_X(2) = FLUX_TERM_X(2) - TAUXX
+  FLUX_TERM_X(3) = FLUX_TERM_X(3) - TAUXY
+  FLUX_TERM_X(4) = FLUX_TERM_X(4) - TAUXZ
+  FLUX_TERM_X(5) = FLUX_TERM_X(5) - (U * TAUXX + V * TAUXY + W * TAUXZ + LAML(1) * TX)
 
-    FLUX_TERM_Y(2) = FLUX_TERM_Y(2) - TAUXY
-    FLUX_TERM_Y(3) = FLUX_TERM_Y(3) - TAUYY
-    FLUX_TERM_Y(4) = FLUX_TERM_Y(4) - TAUYZ
-    FLUX_TERM_Y(5) = FLUX_TERM_Y(5) - (U * TAUXY + V * TAUYY + W * TAUYZ + LAML(1) * TY)
+  FLUX_TERM_Y(2) = FLUX_TERM_Y(2) - TAUXY
+  FLUX_TERM_Y(3) = FLUX_TERM_Y(3) - TAUYY
+  FLUX_TERM_Y(4) = FLUX_TERM_Y(4) - TAUYZ
+  FLUX_TERM_Y(5) = FLUX_TERM_Y(5) - (U * TAUXY + V * TAUYY + W * TAUYZ + LAML(1) * TY)
 
-    FLUX_TERM_Z(2) = FLUX_TERM_Z(2) - TAUXZ
-    FLUX_TERM_Z(3) = FLUX_TERM_Z(3) - TAUYZ
-    FLUX_TERM_Z(4) = FLUX_TERM_Z(4) - TAUZZ
-    FLUX_TERM_Z(5) = FLUX_TERM_Z(5) - (U * TAUXZ + V * TAUYZ + W * TAUZZ + LAML(1) * TZ)
+  FLUX_TERM_Z(2) = FLUX_TERM_Z(2) - TAUXZ
+  FLUX_TERM_Z(3) = FLUX_TERM_Z(3) - TAUYZ
+  FLUX_TERM_Z(4) = FLUX_TERM_Z(4) - TAUZZ
+  FLUX_TERM_Z(5) = FLUX_TERM_Z(5) - (U * TAUXZ + V * TAUYZ + W * TAUZZ + LAML(1) * TZ)
 
 END SUBROUTINE
 
@@ -4488,19 +4480,19 @@ END SUBROUTINE
 
 
 SUBROUTINE DCONS2DPRIM(LEFTV_DER,LEFTV)
-IMPLICIT NONE
-REAL,DIMENSION(1:NOF_VARIABLES,1:DIMENSIONA),INTENT(INOUT)::LEFTV_DER
-REAL,DIMENSION(1:NOF_VARIABLES),INTENT(IN)::LEFTV
-INTEGER:: I_DIM, I_VAR
+  IMPLICIT NONE
+  REAL,DIMENSION(1:NOF_VARIABLES,1:DIMENSIONA),INTENT(INOUT)::LEFTV_DER
+  REAL,DIMENSION(1:NOF_VARIABLES),INTENT(IN)::LEFTV
+  INTEGER:: I_DIM, I_VAR
 
-DO I_DIM = 1, DIMENSIONA
-    DO I_VAR = 2, NOF_VARIABLES-1
-        LEFTV_DER(I_VAR,I_DIM) = (LEFTV_DER(I_VAR,I_DIM) - LEFTV_DER(1,I_DIM) * LEFTV(I_VAR)) / LEFTV(1) ! UX = (RHOUX - RHOX * U) / RHO
-    END DO
+  DO I_DIM = 1, DIMENSIONA
+      DO I_VAR = 2, NOF_VARIABLES-1
+          LEFTV_DER(I_VAR,I_DIM) = (LEFTV_DER(I_VAR,I_DIM) - LEFTV_DER(1,I_DIM) * LEFTV(I_VAR)) / LEFTV(1) ! UX = (RHOUX - RHOX * U) / RHO
+      END DO
 
-    LEFTV_DER(NOF_VARIABLES,I_DIM) = (GAMMA - 1.0D0) * ((LEFTV(1) * LEFTV_DER(NOF_VARIABLES,I_DIM) - LEFTV(NOF_VARIABLES) * LEFTV_DER(1,I_DIM)) / LEFTV(1) ** 2 - DOT_PRODUCT(LEFTV(2:NOF_VARIABLES-1), LEFTV_DER(2:NOF_VARIABLES-1,I_DIM)))
-    ! TX = (GAMMA-1) * ((RHO * EX - E * RHOX) / RHO ** 2 - (U * UX + V * VX + W * WX))
-END DO
+      LEFTV_DER(NOF_VARIABLES,I_DIM) = (GAMMA - 1.0D0) * ((LEFTV(1) * LEFTV_DER(NOF_VARIABLES,I_DIM) - LEFTV(NOF_VARIABLES) * LEFTV_DER(1,I_DIM)) / LEFTV(1) ** 2 - DOT_PRODUCT(LEFTV(2:NOF_VARIABLES-1), LEFTV_DER(2:NOF_VARIABLES-1,I_DIM)))
+      ! TX = (GAMMA-1) * ((RHO * EX - E * RHOX) / RHO ** 2 - (U * UX + V * VX + W * WX))
+  END DO
 
 END SUBROUTINE DCONS2DPRIM
 

@@ -1070,7 +1070,8 @@ SUBROUTINE PAD_NAD(N)
                 parameter = MOOD_VAR6
             end if
             
-            !$OMP DO REDUCTION (MAX:MAX_ENTROPY)
+            ! !$OMP DO REDUCTION (MAX:MAX_ENTROPY)
+            !$OMP DO
             DO II=1,NOF_INTERIOR
                 I=EL_INT(II)
                 ICONSIDERED=I
@@ -1116,7 +1117,7 @@ SUBROUTINE PAD_NAD(N)
                     entropy_new = ENTROPY(rho_new, p_new, gamma)
                     entropy_old = ENTROPY(rho_old, p_old, gamma)
 
-                    max_entropy = MAX(entropy_old, max_entropy)
+                    ! max_entropy = MAX(entropy_old, max_entropy)
                     
                     ! helper_value = ABS(entropy_new - entropy_old)/CELL_AREA
                     helper_value = ABS(entropy_new - entropy_old)/CELL_SIZE
@@ -1134,7 +1135,8 @@ SUBROUTINE PAD_NAD(N)
             END DO
             !$OMP END DO		
 
-            !$OMP DO REDUCTION (MAX:MAX_ENTROPY)
+            ! !$OMP DO REDUCTION (MAX:MAX_ENTROPY)
+            !$OMP DO
             DO II=1,NOF_BOUNDED
                 I=EL_BND(II)
                 ICONSIDERED=I
@@ -1178,7 +1180,7 @@ SUBROUTINE PAD_NAD(N)
                     entropy_new = ENTROPY(rho_new, p_new, gamma)
                     entropy_old = ENTROPY(rho_old, p_old, gamma)
 
-                    max_entropy = MAX(entropy_old, max_entropy)
+                    ! max_entropy = MAX(entropy_old, max_entropy)
                     
                     ! helper_value = ABS(entropy_new - entropy_old)/CELL_AREA
                     helper_value = ABS(entropy_new - entropy_old)/CELL_SIZE

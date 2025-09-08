@@ -331,8 +331,8 @@ REAL,dimension(100,3)::bubble_centre
 real,dimension(100)::bubble_radius
 INTEGER::NOF_BUBBLES
 
-real::max_entropy
-real::global_max_entropy
+! real::max_entropy
+! real::global_max_entropy
 
 real:: momentx,momenty,momentz
 !--------------------------------------------------------------------------------------------------------------------------!
