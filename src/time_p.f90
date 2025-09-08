@@ -3982,7 +3982,7 @@ SUBROUTINE TIME_MARCHING2(N)
           if (NumStepsToOutput1 <= 8) then
             dt = min(dt, (OUT_TIME-T) / NumStepsToOutput1)
           endif
-          if (NumStepsToOutput2 < 5) then
+          if (NumStepsToOutput2 <= 8) then
             dt = min(dt, (EVERY_TIME-T) / NumStepsToOutput2)
           endif
       END IF
