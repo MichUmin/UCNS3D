@@ -141,11 +141,21 @@ Subroutine HLL_RIEMANN_SOLVER(N,CLEFT_ROT,CRIGHT_ROT,HLLCFLUX,MP_SOURCE1,SRF_SPE
 			FR(3)=RR*UR*VR
 			FR(4)=RR*UR*WR
 			FR(5)=UR*(ER+PR)
+
+
+
 			
 			IF ((TURBULENCE.EQ.1).OR.(PASSIVESCALAR.GT.0))THEN
 			FL(6:5+TURBULENCEEQUATIONS+PASSIVESCALAR)=RML(1:0+TURBULENCEEQUATIONS+PASSIVESCALAR)*UL
 			FR(6:5+TURBULENCEEQUATIONS+PASSIVESCALAR)=RMR(1:0+TURBULENCEEQUATIONS+PASSIVESCALAR)*UR
 			END IF
+
+
+			 if (MULTISPECIES.EQ.1)THEN
+			FL(6:NOF_VARIABLES)=ROTVL(6:NOF_VARIABLES)*UL
+			FR(6:NOF_VARIABLES)=ROTVR(6:NOF_VARIABLES)*UR
+			END IF
+
 			
 
             sl(1)=min(ul-ccl,ur-ccr)
@@ -157,6 +167,7 @@ Subroutine HLL_RIEMANN_SOLVER(N,CLEFT_ROT,CRIGHT_ROT,HLLCFLUX,MP_SOURCE1,SRF_SPE
 			
 	FHLL(:)=(SR(1)*FL(:)-SL(1)*FR(:)+(SL(1)*SR(1)*(CRIGHT_ROT(:)-CleFT_ROT(:))))/(SR(1)-SL(1))
 			
+<<<<<<< HEAD
 	IF (SL(1).GE.ZERO)THEN
 		HLLCFLUX(:)=FL(:)
 	END IF
@@ -166,6 +177,48 @@ Subroutine HLL_RIEMANN_SOLVER(N,CLEFT_ROT,CRIGHT_ROT,HLLCFLUX,MP_SOURCE1,SRF_SPE
 	IF ((SL(1).LE.ZERO).AND.(SR(1).GE.ZERO))THEN
 		HLLCFLUX(:)=FHLL(:)
 	END IF
+=======
+
+			
+			IF (SL(1).GE.ZERO)THEN
+				HLLCFLUX(:)=FL(:)
+
+				IF (MULTISPECIES.EQ.1)THEN
+
+                MP_SOURCE1=UL
+
+                END IF
+
+			END IF
+			IF (SR(1).LE.ZERO)THEN
+				HLLCFLUX(:)=FR(:)
+
+
+				IF (MULTISPECIES.EQ.1)THEN
+
+                MP_SOURCE1=UR
+
+                END IF
+
+			END IF
+			IF ((SL(1).LE.ZERO).AND.(SR(1).GE.ZERO))THEN
+				HLLCFLUX(:)=FHLL(:)
+
+
+				IF (MULTISPECIES.EQ.1)THEN
+
+                MP_SOURCE1=(UL+UR)/2
+
+
+
+                END IF
+
+			END IF
+
+			
+			
+
+>>>>>>> refs/remotes/origin/master
 
 END SUBROUTINE HLL_RIEMANN_SOLVER
 
@@ -1825,16 +1878,54 @@ Subroutine HLL_RIEMANN_SOLVER2d(N,CLEFT_ROT,CRIGHT_ROT,HLLCFLUX,MP_SOURCE1,SRF_S
         sr(1)=max(ul+ccl,ur+ccr)
 
 
+        if (MULTISPECIES.EQ.1)THEN
+			FL(5:NOF_VARIABLES)=ROTVL(5:NOF_VARIABLES)*UL
+			FR(5:NOF_VARIABLES)=ROTVR(5:NOF_VARIABLES)*UR
+			END IF
+
+
 			FHLL(:)=(SR(1)*FL(:)-SL(1)*FR(:)+(SL(1)*SR(1)*(CRIGHT_ROT(:)-ClefT_ROT(:))))/(SR(1)-SL(1))
 
 			IF (SL(1).GE.ZERO)THEN
 				HLLCFLUX(:)=FL(:)
+<<<<<<< HEAD
 			END IF
 			IF (SR(1).LE.ZERO)THEN
 				HLLCFLUX(:)=FR(:)
 			END IF
 			IF ((SL(1).LE.ZERO).AND.(SR(1).GE.ZERO))THEN
 				HLLCFLUX(:)=FHLL(:)
+=======
+
+				IF (MULTISPECIES.EQ.1)THEN
+
+                MP_SOURCE1=UL
+
+                END IF
+
+			END IF
+			IF (SR(1).LE.ZERO)THEN
+				HLLCFLUX(:)=FR(:)
+
+				IF (MULTISPECIES.EQ.1)THEN
+
+                MP_SOURCE1=UR
+
+                END IF
+
+			END IF
+			IF ((SL(1).LE.ZERO).AND.(SR(1).GE.ZERO))THEN
+				HLLCFLUX(:)=FHLL(:)
+
+				IF (MULTISPECIES.EQ.1)THEN
+
+                MP_SOURCE1=(UL+UR)/2
+
+
+
+                END IF
+
+>>>>>>> refs/remotes/origin/master
 			END IF
 
 			!pgrad=abs(pl-pr)/min(pl,pr)

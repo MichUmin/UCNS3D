@@ -3884,11 +3884,16 @@ if (initcond.eq.405)then
 
   DO I=1,KMAXE
     IF (DIMENSIONA.EQ.3)THEN
+<<<<<<< HEAD
       IF (U_C(I)%VAL(1,8).GT.0.05D0)THEN
+=======
+    IF (U_C(I)%VAL(1,8).GT.0.1D0)THEN
+>>>>>>> refs/remotes/origin/master
         IF (IELEM(N,I)%XXC.le.POST1)THEN
           POST1=IELEM(N,I)%XXC
           TRAJ1=I
         END IF
+<<<<<<< HEAD
         IF (((IELEM(N,I)%YYC.LE.0.052).AND.(IELEM(N,I)%YYC.GE.0.048)).and.((IELEM(N,I)%zzC.LE.0.052).AND.(IELEM(N,I)%zzC.GE.0.048)))THEN
           IF(IELEM(N,I)%XXC.lE.POST2)THEN
             POST2=IELEM(N,I)%XXC
@@ -3898,9 +3903,21 @@ if (initcond.eq.405)then
             post3=ielem(n,i)%xxc
             traj3=i
           end if
+=======
+        IF (((IELEM(N,I)%YYC.LE.0.0515).AND.(IELEM(N,I)%YYC.GE.0.0485)).and.((IELEM(N,I)%zzC.LE.0.0515).AND.(IELEM(N,I)%zzC.GE.0.0485)))THEN
+            IF(IELEM(N,I)%XXC.lE.POST2)THEN
+                POST2=IELEM(N,I)%XXC
+                TRAJ2=i
+            end if
+            if (ielem(n,i)%xxc.ge.post3)then
+                post3=ielem(n,i)%xxc
+                traj3=i
+            end if
+>>>>>>> refs/remotes/origin/master
         END IF
       END IF
     ELSE
+<<<<<<< HEAD
       IF (U_C(I)%VAL(1,7).GT.0.4D0)THEN
         IF (IELEM(N,I)%XXC.LE.POST1)THEN
           POST1=IELEM(N,I)%XXC
@@ -3915,6 +3932,22 @@ if (initcond.eq.405)then
             post3=ielem(n,i)%xxc
             traj3=i
           end if
+=======
+    IF (U_C(I)%VAL(1,7).Ge.0.1D0)THEN
+        IF (IELEM(N,I)%XXC.lE.POST1)THEN
+            POST1=IELEM(N,I)%XXC
+            TRAJ1=I
+        END IF
+        IF (((IELEM(N,I)%YYC.LE.0.0515).AND.(IELEM(N,I)%YYC.GE.0.0485)))THEN
+            IF(IELEM(N,I)%XXC.lE.POST2)THEN
+                POST2=IELEM(N,I)%XXC
+                TRAJ2=i
+            end if
+            if (ielem(n,i)%xxc.GE.post3)then
+                post3=ielem(n,i)%xxc
+                traj3=i
+            end if
+>>>>>>> refs/remotes/origin/master
         END IF
       END IF
     END IF

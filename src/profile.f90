@@ -338,6 +338,7 @@ IF (INITCOND.EQ.405)THEN
             w1=0.0d0
             P1=101325
 
+<<<<<<< HEAD
             ! SKIN1=(OO2)*((U1**2)+(V1**2))
             R1=(MP_R(1)*MP_A(1))+(MP_R(2)*MP_A(2))
             MP_IE(1)=((P1+(GAMMA_IN(1)*MP_PINF(1)))/((GAMMA_IN(1)-1.0D0)))
@@ -345,6 +346,81 @@ IF (INITCOND.EQ.405)THEN
             IE1=(MP_IE(1)*MP_A(1))+(MP_IE(2)*MP_A(2))
             SKIN1=(OO2)*((U1**2)+(V1**2)+(w1**2))
             E1=(R1*SKIN1)+IE1
+=======
+!FIRST WITHIN BUBBLE REGION
+
+
+
+if (sqrt(((pox(1)+0.05d0)**2)+((poy(1)-0.05d0)**2)+((poz(1)-0.05d0)**2)).LE.0.025d0)then
+MP_R(1)=0.166315789d0
+MP_R(2)=1.204D0
+MP_A(1)=0.95d0
+MP_A(2)=0.05D0
+U1=0.0D0
+V1=0.0D0
+w1=0.0d0
+P1=101325
+
+! SKIN1=(OO2)*((U1**2)+(V1**2))
+R1=(MP_R(1)*MP_A(1))+(MP_R(2)*MP_A(2))
+MP_IE(1)=((P1+(GAMMA_IN(1)*MP_PINF(1)))/((GAMMA_IN(1)-1.0D0)))
+MP_IE(2)=((P1+(GAMMA_IN(2)*MP_PINF(2)))/((GAMMA_IN(2)-1.0D0)))
+IE1=(MP_IE(1)*MP_A(1))+(MP_IE(2)*MP_A(2))
+SKIN1=(OO2)*((U1**2)+(V1**2)+(w1**2))
+E1=(R1*SKIN1)+IE1
+!VECTOR OF CONSERVED VARIABLES NOW
+else
+
+
+
+MP_R(1)=0.166315789d0
+MP_R(2)=1.204D0
+MP_A(1)=0.0D0
+MP_A(2)=1.0D0
+U1=0.0D0
+V1=0.0D0
+w1=0.0d0
+P1=101325
+
+
+! SKIN1=(OO2)*((U1**2)+(V1**2))
+R1=(MP_R(1)*MP_A(1))+(MP_R(2)*MP_A(2))
+MP_IE(1)=((P1+(GAMMA_IN(1)*MP_PINF(1)))/((GAMMA_IN(1)-1.0D0)))
+MP_IE(2)=((P1+(GAMMA_IN(2)*MP_PINF(2)))/((GAMMA_IN(2)-1.0D0)))
+IE1=(MP_IE(1)*MP_A(1))+(MP_IE(2)*MP_A(2))
+SKIN1=(OO2)*((U1**2)+(V1**2)+(w1**2))
+E1=(R1*SKIN1)+IE1
+
+!VECTOR OF CONSERVED VARIABLES NOW
+end if
+
+
+
+
+
+
+END IF
+
+
+
+
+
+
+
+
+
+
+
+
+VECCOS(1)=R1
+VECCOS(2)=R1*U1
+VECCOS(3)=R1*V1
+VECCOS(4)=R1*w1
+VECCOS(5)=E1
+VECCOS(6)=MP_R(1)*MP_A(1)
+VECCOS(7)=MP_R(2)*MP_A(2)
+VECCOS(8)=MP_A(1)
+>>>>>>> refs/remotes/origin/master
 
             !VECTOR OF CONSERVED VARIABLES NOW
         end if

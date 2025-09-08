@@ -3726,6 +3726,7 @@ SUBROUTINE TIME_MARCHING(N)
       ! END IF
       END IF
            
+<<<<<<< HEAD
       ! IF ((initcond.eq.405).or.(initcond.eq.422).or.(initcond.eq.411).or.(initcond.eq.157))THEN
       !     IF ( mod(it, 1) .eq. 0)THEN
       !         CALL TRAJECTORIES
@@ -3733,6 +3734,64 @@ SUBROUTINE TIME_MARCHING(N)
       !	END IF
       
       !$OMP END MASTER 
+=======
+ 			    IF ((initcond.eq.405).or.(initcond.eq.422).or.(initcond.eq.411).or.(initcond.eq.157))THEN
+! 			    IF ( mod(it, 1) .eq. 0)THEN
+                                 CALL TRAJECTORIES
+! 			    END IF
+ 			    END IF
+			
+			
+			
+			!$OMP END MASTER 
+			!$OMP BARRIER
+			
+			IF ( mod(it, IForce) .eq. 0) THEN
+			IF (OUTSURF.EQ.1) THEN   
+			
+				  CALL forces
+			END IF
+			END IF
+			
+			IF ((rungekutta.ge.5).and.(rungekutta.lt.11))THEN
+			IF ( mod(it, residualfreq) .eq. 0) THEN
+			
+                               CALL RESIDUAL_COMPUTE
+			END IF
+			END IF
+			
+			
+			
+		
+			
+			
+			
+			!$OMP MASTER
+			IF (NPROBES.GT.0) CALL PROBING
+					
+			
+			IF (TIMEC1.GE.IEVERY)THEN
+			
+			    CALL VOLUME_SOLUTION_WRITE
+			     IF (outsurf.eq.1)THEN
+			    CALL surface_SOLUTION_WRITE
+			    END IF
+			CPUT1=MPI_WTIME()
+			END IF
+			
+			IF (INITCOND.eq.95)THEN           
+			if (abs(T - ((IDNINT(T/output_freq)) * output_freq)).le.tolsmall) then
+			
+                CALL VOLUME_SOLUTION_WRITE
+			     if (outsurf.eq.1)then
+			    call surface_SOLUTION_WRITE
+			    end if
+			    IF (INITCOND.eq.95)THEN                    
+			    CALL CHECKPOINTv4(N)
+			    END IF
+			EVERY_TIME=EVERY_TIME+output_freq
+            END IF
+>>>>>>> refs/remotes/origin/master
 
       !$OMP BARRIER
 			
@@ -4005,8 +4064,18 @@ SUBROUTINE TIME_MARCHING2(N)
               CALL RUNGE_KUTTA3_2D(N)
           END IF
 
+<<<<<<< HEAD
         CASE(4)
           CALL RUNGE_KUTTA4_2D(N)
+=======
+     IF ((MULTISPECIES.EQ.1))THEN
+         IF((initcond.eq.405).or.(initcond.eq.411))THEN
+            ! IF ( mod(it, 20) .eq. 0)THEN
+                 CALL TRAJECTORIES
+            ! END IF
+         END IF
+     END IF
+>>>>>>> refs/remotes/origin/master
 
         CASE(5)
           CALL RUNGE_KUTTA5_2D(N)
