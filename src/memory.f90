@@ -844,7 +844,7 @@ SELECT CASE(RUNGEKUTTA)
 		ISTAGE=5
 	ELSE
 		ISTAGE=3
-		if (mood.eq.1)then
+		if ((mood.eq.1).or.(hybridCWENO_MOOD.gt.0)) then
 			ISTAGE=4
 		end if
 	END IF
@@ -916,7 +916,7 @@ DO I=1,KMAXE
 END DO
 	
 	
-IF (MOOD.EQ.1)THEN
+IF ((MOOD.EQ.1).or.(hybridCWENO_MOOD.gt.0))THEN
 	DO I=1,KMAXE
     	IELEM(N,I)%RECALC=0
 	END DO

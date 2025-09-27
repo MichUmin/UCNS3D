@@ -5657,7 +5657,11 @@ SUBROUTINE ADAPT_CRITERION
 		xmin_ad=0.01
 		xmax_ad=0.15
 	end if
-	if ((initcond.eq.405).or.(initcond.eq.422)) then
+	if (initcond.eq.101)then
+		xmax_ad=4.45
+		xmin_ad=-4.45
+	end if
+	if ((initcond.eq.405).or.(initcond.eq.422).or.(initcond.eq.101)) then
 		DO I=1,KMAXE
 			FC=0
 			IF (IELEM(N,I)%XXC.LT.xmin_ad)THEN
@@ -5672,29 +5676,29 @@ SUBROUTINE ADAPT_CRITERION
 			END IF
 		END DO
 	end if
-	if (initcond.eq.101)then
-		ymin_ad=0.1
-		ymax_ad=0.9
-	end if
-	if (initcond.eq.103)then
-		ymin_ad=1
-		ymax_ad=9
-	end if
-	if ((initcond.eq.101).or.(initcond.eq.103)) then
-		DO I=1,KMAXE
-			FC=0
-			IF (IELEM(N,I)%YYC.LT.ymin_ad)THEN
-				FC=1
-			END IF
-			IF (IELEM(N,I)%YYC.GT.ymax_ad)THEN
-				FC=1
-			END IF
-			IF (FC.EQ.1)THEN
-				IELEM(N,I)%HYBRID=1
-				IELEM(N,I)%FULL=0
-			END IF
-		END DO
-	end if
+	! if (initcond.eq.101)then
+	! 	ymin_ad=0.1
+	! 	ymax_ad=0.9
+	! end if
+	! if (initcond.eq.103)then
+	! 	ymin_ad=1
+	! 	ymax_ad=9
+	! end if
+	! if ((initcond.eq.101).or.(initcond.eq.103)) then
+	! 	DO I=1,KMAXE
+	! 		FC=0
+	! 		IF (IELEM(N,I)%YYC.LT.ymin_ad)THEN
+	! 			FC=1
+	! 		END IF
+	! 		IF (IELEM(N,I)%YYC.GT.ymax_ad)THEN
+	! 			FC=1
+	! 		END IF
+	! 		IF (FC.EQ.1)THEN
+	! 			IELEM(N,I)%HYBRID=1
+	! 			IELEM(N,I)%FULL=0
+	! 		END IF
+	! 	END DO
+	! end if
 
 END SUBROUTINE ADAPT_CRITERION
 

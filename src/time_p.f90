@@ -14,6 +14,8 @@ USE implicit_FLUXES
 USE DECLARATION
 USE IO
 USE MOODR
+USE hybridCWENO_MOOD_module
+
 IMPLICIT NONE
 
  CONTAINS
@@ -25,23 +27,23 @@ IMPLICIT NONE
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!EMPLOYED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE CALCULATE_CFL(N)
-!> @brief
-!> subroutine for computing the global time step size in 3D
-IMPLICIT NONE
-INTEGER,INTENT(IN)::N
-INTEGER::I,K,L,KMAXE,J,INGTMAX,INGTMIN,WHGU,WHGL,SRF
-REAL::SUVI,SUV3,maxU,MINU
-REAL::CCFL,VELN,AGRT
-real,dimension(1:nof_Variables)::leftv,rightv
-real,dimension(1:nof_Variables)::SRF_SPEED
-real::MP_PINFL,gammal
-REAL,DIMENSION(1:DIMENSIONA)::POX,POY,POZ
-REAL,DIMENSION(1:4)::VISCL,LAML
-REAL,DIMENSION(1:20)::EDDYFL,EDDYFR
-REAL,DIMENSION(1:2)::TURBMV
-REAL,DIMENSION(1)::ETVM
+  !> @brief
+  !> subroutine for computing the global time step size in 3D
+  IMPLICIT NONE
+  INTEGER,INTENT(IN)::N
+  INTEGER::I,K,L,KMAXE,J,INGTMAX,INGTMIN,WHGU,WHGL,SRF
+  REAL::SUVI,SUV3,maxU,MINU
+  REAL::CCFL,VELN,AGRT
+  real,dimension(1:nof_Variables)::leftv,rightv
+  real,dimension(1:nof_Variables)::SRF_SPEED
+  real::MP_PINFL,gammal
+  REAL,DIMENSION(1:DIMENSIONA)::POX,POY,POZ
+  REAL,DIMENSION(1:4)::VISCL,LAML
+  REAL,DIMENSION(1:20)::EDDYFL,EDDYFR
+  REAL,DIMENSION(1:2)::TURBMV
+  REAL,DIMENSION(1)::ETVM
 
-KMAXE=XMPIELRANK(N)
+  KMAXE=XMPIELRANK(N)
        
   CCFL=(CFL/3.0d0)
         
@@ -166,23 +168,27 @@ KMAXE=XMPIELRANK(N)
         
 END SUBROUTINE CALCULATE_CFL
 
+
+
+
+
 SUBROUTINE CALCULATE_CFLL(N)
-!> @brief
-!> subroutine for computing the time step size for each cell in 3D
-IMPLICIT NONE
-INTEGER,INTENT(IN)::N
-INTEGER::I,K,L,KMAXE,J,INGTMAX,INGTMIN,WHGU,WHGL,SRF
-REAL::SUVI,SUV3,maxU,MINU
-REAL::CCFL,VELN,AGRT
-real,dimension(1:nof_Variables)::leftv,rightv
-real,dimension(1:nof_Variables)::SRF_SPEED
-real::MP_PINFL,gammal
-REAL,DIMENSION(1:DIMENSIONA)::POX,POY,POZ
-REAL,DIMENSION(1:4)::VISCL,LAML
-REAL,DIMENSION(1:20)::EDDYFL,EDDYFR
-REAL,DIMENSION(1:2)::TURBMV
-REAL,DIMENSION(1)::ETVM
-KMAXE=XMPIELRANK(N)
+  !> @brief
+  !> subroutine for computing the time step size for each cell in 3D
+  IMPLICIT NONE
+  INTEGER,INTENT(IN)::N
+  INTEGER::I,K,L,KMAXE,J,INGTMAX,INGTMIN,WHGU,WHGL,SRF
+  REAL::SUVI,SUV3,maxU,MINU
+  REAL::CCFL,VELN,AGRT
+  real,dimension(1:nof_Variables)::leftv,rightv
+  real,dimension(1:nof_Variables)::SRF_SPEED
+  real::MP_PINFL,gammal
+  REAL,DIMENSION(1:DIMENSIONA)::POX,POY,POZ
+  REAL,DIMENSION(1:4)::VISCL,LAML
+  REAL,DIMENSION(1:20)::EDDYFL,EDDYFR
+  REAL,DIMENSION(1:2)::TURBMV
+  REAL,DIMENSION(1)::ETVM
+  KMAXE=XMPIELRANK(N)
        
   CCFL=(CFL/3.0d0)
         
@@ -302,8 +308,8 @@ END SUBROUTINE CALCULATE_CFLL
 
 
 SUBROUTINE CALCULATE_CFL2D(N)
-!> @brief
-!> subroutine for computing the global time step size in 2D
+  !> @brief
+  !> subroutine for computing the global time step size in 2D
   IMPLICIT NONE
   INTEGER,INTENT(IN)::N
   INTEGER::I,K,L,KMAXE,J,INGTMAX,INGTMIN,WHGU,WHGL
@@ -322,7 +328,6 @@ SUBROUTINE CALCULATE_CFL2D(N)
   CCFL=(CFL/2.0d0)
   
   DT=tolbig
-  
   
   !$OMP BARRIER
         
@@ -411,22 +416,22 @@ END SUBROUTINE CALCULATE_CFL2D
 
 
 SUBROUTINE CALCULATE_CFLL2D(N)
-!> @brief
-!> subroutine for computing the time step size for each cell in 2D
-IMPLICIT NONE
-INTEGER,INTENT(IN)::N
-INTEGER::I,K,L,KMAXE,J,INGTMAX,INGTMIN,WHGU,WHGL
-REAL::SUVI,SUV3,maxU,MINU
-REAL::CCFL,VELN,AGRT
-real,dimension(1:nof_Variables)::leftv,rightv
-real,dimension(1:nof_Variables)::SRF_SPEED
-reaL::MP_PINFL,gammal,MP_PINFr,gammar
-REAL,DIMENSION(1:DIMENSIONA)::POX,POY,POZ
-REAL,DIMENSION(1:4)::VISCL,LAML
-REAL,DIMENSION(1:20)::EDDYFL,EDDYFR
-REAL,DIMENSION(1:2)::TURBMV
-REAL,DIMENSION(1)::ETVM
-KMAXE=XMPIELRANK(N)
+  !> @brief
+  !> subroutine for computing the time step size for each cell in 2D
+  IMPLICIT NONE
+  INTEGER,INTENT(IN)::N
+  INTEGER::I,K,L,KMAXE,J,INGTMAX,INGTMIN,WHGU,WHGL
+  REAL::SUVI,SUV3,maxU,MINU
+  REAL::CCFL,VELN,AGRT
+  real,dimension(1:nof_Variables)::leftv,rightv
+  real,dimension(1:nof_Variables)::SRF_SPEED
+  reaL::MP_PINFL,gammal,MP_PINFr,gammar
+  REAL,DIMENSION(1:DIMENSIONA)::POX,POY,POZ
+  REAL,DIMENSION(1:4)::VISCL,LAML
+  REAL,DIMENSION(1:20)::EDDYFL,EDDYFR
+  REAL,DIMENSION(1:2)::TURBMV
+  REAL,DIMENSION(1)::ETVM
+  KMAXE=XMPIELRANK(N)
        
   CCFL=(CFL/2.0d0)
            
@@ -458,8 +463,6 @@ KMAXE=XMPIELRANK(N)
 	  END DO
 	  !$OMP END DO
 	END IF
-	
-	
 	
 	IF (ITESTCASE.EQ.4)THEN
 	  !$OMP DO
@@ -503,24 +506,24 @@ END SUBROUTINE CALCULATE_CFLL2D
 ! ! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! ! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE RUNGE_KUTTA3_MOOD(N)
-!> @brief
-!> SSP RUNGE KUTTA 3RD-ORDER SCHEME
-IMPLICIT NONE
-INTEGER,INTENT(IN)::N
-INTEGER::IAVR,nvar,I,KMAXE,inds
-REAL::AVRGS,OOVOLUME,TO4,OO4,TO3,OO3
-KMAXE=XMPIELRANK(N)
-TO4=3.0D0/4.0D0
-OO4=1.0D0/4.0D0
-TO3=2.0D0/3.0D0
-OO3=1.0D0/3.0D0	
+  !> @brief
+  !> SSP RUNGE KUTTA 3RD-ORDER SCHEME
+  IMPLICIT NONE
+  INTEGER,INTENT(IN)::N
+  INTEGER::IAVR,nvar,I,KMAXE,inds
+  REAL::AVRGS,OOVOLUME,TO4,OO4,TO3,OO3
+  KMAXE=XMPIELRANK(N)
+  TO4=3.0D0/4.0D0
+  OO4=1.0D0/4.0D0
+  TO3=2.0D0/3.0D0
+  OO3=1.0D0/3.0D0	
 
 
-IF (MOOD.EQ.1)THEN
-  INDS=4
-ELSE
-  INDS=1
-END IF
+  IF (MOOD.EQ.1)THEN
+    INDS=4
+  ELSE
+    INDS=1
+  END IF
 
 IF (FASTEST.EQ.1)THEN
     CALL EXCHANGE_LOWER(N)
@@ -1500,289 +1503,284 @@ END SUBROUTINE RUNGE_KUTTA3_2D
 
 
 SUBROUTINE RUNGE_KUTTA3_2D_MOOD(N)
-!> @brief
-!> SSP RUNGE KUTTA 3RD-ORDER SCHEME
-IMPLICIT NONE
-INTEGER,INTENT(IN)::N
-INTEGER::I,KMAXE,INDS
-REAL::AVRGS,OOVOLUME,TO4,OO4,TO3,OO3
-KMAXE=XMPIELRANK(N)
-TO4=3.0D0/4.0D0
-OO4=1.0D0/4.0D0
-TO3=2.0D0/3.0D0
-OO3=1.0D0/3.0D0	
+  !> @brief
+  !> SSP RUNGE KUTTA 3RD-ORDER SCHEME
+  IMPLICIT NONE
+  INTEGER,INTENT(IN)::N
+  INTEGER::I,KMAXE,INDS
+  REAL::AVRGS,OOVOLUME,TO4,OO4,TO3,OO3
+  KMAXE=XMPIELRANK(N)
+  TO4=3.0D0/4.0D0
+  OO4=1.0D0/4.0D0
+  TO3=2.0D0/3.0D0
+  OO3=1.0D0/3.0D0	
 
 
-IF (MOOD.EQ.1)THEN
-  INDS=4
-ELSE
-  INDS=1
-END IF
-
-IF (FASTEST.EQ.1)THEN
-    CALL EXCHANGE_LOWER(N)
-    CALL ARBITRARY_ORDER(N)
-    CALL EXHBOUNDHIGHER(N)
-    
-    SELECT CASE(ITESTCASE)
-      CASE(1,2)
-        CALL CALCULATE_FLUXESHI2D(N)
-      CASE(3)
-        CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-      CASE(4)
-        CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-        CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
-        IF (turbulence.eq.1)THEN
-            CALL SOURCES_COMPUTATION2d(N)
-        END IF
-    END SELECT
-    
-ELSE
-    CALL EXCHANGE_HIGHER(N)
-    CALL ARBITRARY_ORDER(N)
-    CALL EXHBOUNDHIGHER(N)
-    SELECT CASE(ITESTCASE)
-      CASE(1,2)
-        CALL CALCULATE_FLUXESHI2D(N)
-      CASE(3)
-        CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-      CASE(4)
-        CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-        CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
-        IF (turbulence.eq.1)THEN
-            CALL SOURCES_COMPUTATION2d(N)
-        END IF
-    END SELECT
-END IF
-
-
-!$OMP DO
-DO I=1,KMAXE
-  OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
-  U_C(I)%VAL(2,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
   IF (MOOD.EQ.1)THEN
-    U_C(I)%VAL(3,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
+    INDS=4
+  ELSE
+    INDS=1
   END IF
-  U_C(I)%VAL(INDS,1:NOF_VARIABLES)=U_C(I)%VAL(2,1:NOF_VARIABLES)-(DT*(RHS(I)%VAL(1:NOF_VARIABLES)*OOVOLUME))
-END DO
-!$OMP END DO
 
-IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
-  !$OMP DO
-  DO I=1,KMAXE
-    OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
-    U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)
-    U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar)-(DT*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
-  END DO
-  !$OMP END DO
-END IF
- 
-IF (MOOD.EQ.1)THEN
- 
-  CALL MOOD_OPERATOR_2(N)
-  !$OMP DO
-  DO I=1,KMAXE
-    IF (IELEM(N,I)%RECALC.EQ.1)THEN
-      OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
-      U_C(I)%VAL(INDS,1:NOF_VARIABLES)=U_C(I)%VAL(2,1:NOF_VARIABLES)-(DT*(RHS(I)%VAL(1:NOF_VARIABLES)*OOVOLUME))
-      IELEM(N,I)%MOOD_O=2
-    END IF
-  END DO
-  !$OMP END DO
-
-  CALL MOOD_OPERATOR_1(N)
-
-  !$OMP DO
-  DO I=1,KMAXE
-    IF (IELEM(N,I)%RECALC.EQ.1) THEN
-      OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
-      U_C(I)%VAL(1,1:NOF_VARIABLES)=U_C(I)%VAL(2,1:NOF_VARIABLES)-(DT*(RHS(I)%VAL(1:NOF_VARIABLES)*OOVOLUME))
-      IELEM(N,I)%MOOD_O=1
-    ELSE
-      U_C(I)%VAL(1,1:NOF_VARIABLES)=U_C(I)%VAL(4,1:NOF_VARIABLES)
-    END IF
-  END DO
-  !$OMP END DO
-END IF
-
- 
-
-IF (FASTEST.EQ.1)THEN
-    CALL EXCHANGE_LOWER(N)
-    CALL ARBITRARY_ORDER(N)
-    CALL EXHBOUNDHIGHER(N)
-    SELECT CASE(ITESTCASE)
-      CASE(1,2)
-        CALL CALCULATE_FLUXESHI2D(N)
-      CASE(3)
-        CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-      CASE(4)
-        CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-        CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
-        IF (turbulence.eq.1)THEN
-            CALL SOURCES_COMPUTATION2d(N)
-        END IF
-    END SELECT
-ELSE
-    CALL EXCHANGE_HIGHER(N)
-    CALL ARBITRARY_ORDER(N)
-    CALL EXHBOUNDHIGHER(N)
-    SELECT CASE(ITESTCASE)
-      CASE(1,2)
+  IF (FASTEST.EQ.1)THEN
+      CALL EXCHANGE_LOWER(N)
+      CALL ARBITRARY_ORDER(N)
+      CALL EXHBOUNDHIGHER(N)
+      
+      SELECT CASE(ITESTCASE)
+        CASE(1,2)
           CALL CALCULATE_FLUXESHI2D(N)
-      CASE(3)
+        CASE(3)
           CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-      CASE(4)
-        CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-        CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
-        IF (turbulence.eq.1)THEN
-            CALL SOURCES_COMPUTATION2d(N)
-        END IF
-    END SELECT
-END IF
-
-!$OMP DO
-DO I=1,KMAXE
-  OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
-  U_C(I)%VAL(3,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
-  U_C(I)%VAL(inds,1:NOF_VARIABLES)=(TO4*U_C(I)%VAL(2,1:NOF_VARIABLES))+(OO4*U_C(I)%VAL(3,1:NOF_VARIABLES))-(((OO4))*((DT)*&
-    ((RHS(I)%VAL(1:NOF_VARIABLES))*(OOVOLUME))))
-END DO
-!$OMP END DO
-
-
-IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
-  !$OMP DO
-  DO I=1,KMAXE
-    OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
-    U_Ct(I)%VAL(3,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)
-    U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=(TO4*U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar))+(OO4*U_Ct(I)%VAL(3,1:turbulenceequations+passivescalar))-(((OO4))*((DT)*&
-      ((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
-  END DO
-  !$OMP END DO
-END IF
-
-IF (MOOD.EQ.1)THEN
- 
-  CALL MOOD_OPERATOR_2(N)
-  !$OMP DO
-  DO I=1,KMAXE
-    IF (IELEM(N,I)%RECALC.EQ.1)THEN
-      OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
-      U_C(I)%VAL(INDS,1:NOF_VARIABLES)=(TO4*U_C(I)%VAL(2,1:NOF_VARIABLES))+(OO4*U_C(I)%VAL(3,1:NOF_VARIABLES))-(((OO4))*((DT)*&
-        ((RHS(I)%VAL(1:NOF_VARIABLES))*(OOVOLUME))))
-      IELEM(N,I)%MOOD_O=2
-    END IF
-  END DO
-  !$OMP END DO
-
-  CALL MOOD_OPERATOR_1(N)
-
-  !$OMP DO
-  DO I=1,KMAXE
-    IF (IELEM(N,I)%RECALC.EQ.1)THEN
-      OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
-      U_C(I)%VAL(1,1:NOF_VARIABLES)=(TO4*U_C(I)%VAL(2,1:NOF_VARIABLES))+(OO4*U_C(I)%VAL(3,1:NOF_VARIABLES))-(((OO4))*((DT)*&
-        ((RHS(I)%VAL(1:NOF_VARIABLES))*(OOVOLUME))))
-      IELEM(N,I)%MOOD_O=1
-    ELSE
-      U_C(I)%VAL(1,1:NOF_VARIABLES)=U_C(I)%VAL(4,1:NOF_VARIABLES)
-    END IF
-  END DO
-  !$OMP END DO
-END IF
- 
-
-IF (FASTEST.EQ.1)THEN
-    CALL EXCHANGE_LOWER(N)
-    CALL ARBITRARY_ORDER(N)
-    CALL EXHBOUNDHIGHER(N)
-    SELECT CASE(ITESTCASE)
-      CASE(1,2)
-        CALL CALCULATE_FLUXESHI2D(N)
-      CASE(3)
-        CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-      CASE(4)
-        CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-        CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
-        IF (turbulence.eq.1)THEN
-            CALL SOURCES_COMPUTATION2d(N)
-        END IF
-    END SELECT
-ELSE
-    CALL EXCHANGE_HIGHER(N)
-    CALL ARBITRARY_ORDER(N)
-    CALL EXHBOUNDHIGHER(N)
-    SELECT CASE(ITESTCASE)
-      CASE(1,2)
-        CALL CALCULATE_FLUXESHI2D(N)
-      CASE(3)
-        CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-      CASE(4)
-        CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-        CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
-        IF (turbulence.eq.1)THEN
-            CALL SOURCES_COMPUTATION2d(N)
-        END IF
-        CALL VORTEXCALC2D(N)
-    END SELECT
-END IF
-!$OMP DO
-DO I=1,KMAXE
-  OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
-  IF (MOOD.EQ.1)THEN
-    U_C(I)%VAL(3,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
+        CASE(4)
+          CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
+          CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+          IF (turbulence.eq.1)THEN
+              CALL SOURCES_COMPUTATION2d(N)
+          END IF
+      END SELECT
+    
+  ELSE
+      CALL EXCHANGE_HIGHER(N)
+      CALL ARBITRARY_ORDER(N)
+      CALL EXHBOUNDHIGHER(N)
+      SELECT CASE(ITESTCASE)
+        CASE(1,2)
+          CALL CALCULATE_FLUXESHI2D(N)
+        CASE(3)
+          CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
+        CASE(4)
+          CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
+          CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+          IF (turbulence.eq.1)THEN
+              CALL SOURCES_COMPUTATION2d(N)
+          END IF
+      END SELECT
   END IF
-  U_C(I)%VAL(INDS,1:NOF_VARIABLES)=((OO3)*U_C(I)%VAL(2,1:NOF_VARIABLES))+((TO3)*U_C(I)%VAL(1,1:NOF_VARIABLES))-(((TO3))*&
-    ((DT)*((RHS(I)%VAL(1:NOF_VARIABLES))*(OOVOLUME))))
-END DO
-!$OMP END DO
 
-
-IF (MOOD.EQ.1)THEN
-
-  CALL MOOD_OPERATOR_2(N)
-  !$OMP DO
-  DO I=1,KMAXE
-    IF (IELEM(N,I)%RECALC.EQ.1) THEN
-      OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
-      U_C(I)%VAL(INDS,1:NOF_VARIABLES)=((OO3)*U_C(I)%VAL(2,1:NOF_VARIABLES))+((TO3)*U_C(I)%VAL(1,1:NOF_VARIABLES))-(((TO3))*&
-        ((DT)*((RHS(I)%VAL(1:NOF_VARIABLES))*(OOVOLUME))))
-      IELEM(N,I)%MOOD_O=2
-    END IF
-  END DO
-  !$OMP END DO
-
-  CALL MOOD_OPERATOR_1(N)
-
-  !$OMP DO
-  DO I=1,KMAXE
-    IF (IELEM(N,I)%RECALC.EQ.1)THEN
-      OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
-      U_C(I)%VAL(1,1:NOF_VARIABLES)=((OO3)*U_C(I)%VAL(2,1:NOF_VARIABLES))+((TO3)*U_C(I)%VAL(1,1:NOF_VARIABLES))-(((TO3))*&
-        ((DT)*((RHS(I)%VAL(1:NOF_VARIABLES))*(OOVOLUME))))
-      IELEM(N,I)%MOOD_O=1
-    ELSE
-      U_C(I)%VAL(1,1:NOF_VARIABLES)=U_C(I)%VAL(4,1:NOF_VARIABLES)
-    END IF
-  END DO
-  !$OMP END DO
-END IF
-
-
-IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
   !$OMP DO
   DO I=1,KMAXE
     OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
-    U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=((OO3)*U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar))+((TO3)*U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar))-(((TO3))*&
-      ((DT)*((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
+    U_C(I)%VAL(2,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
+    IF (MOOD.EQ.1)THEN
+      U_C(I)%VAL(3,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
+    END IF
+    U_C(I)%VAL(INDS,1:NOF_VARIABLES)=U_C(I)%VAL(2,1:NOF_VARIABLES)-(DT*(RHS(I)%VAL(1:NOF_VARIABLES)*OOVOLUME))
   END DO
   !$OMP END DO
-END IF
 
-IF (AVERAGING.EQ.1)THEN
-  CALL AVERAGING_T(N)
-END IF
+  IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
+    !$OMP DO
+    DO I=1,KMAXE
+      OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
+      U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)
+      U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar)-(DT*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
+    END DO
+    !$OMP END DO
+  END IF
+ 
+  IF (MOOD.EQ.1)THEN
+  
+    CALL MOOD_OPERATOR_2(N)
+    !$OMP DO
+    DO I=1,KMAXE
+      IF (IELEM(N,I)%RECALC.EQ.1)THEN
+        OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
+        U_C(I)%VAL(INDS,1:NOF_VARIABLES)=U_C(I)%VAL(2,1:NOF_VARIABLES)-(DT*(RHS(I)%VAL(1:NOF_VARIABLES)*OOVOLUME))
+        IELEM(N,I)%MOOD_O=2
+      END IF
+    END DO
+    !$OMP END DO
+
+    CALL MOOD_OPERATOR_1(N)
+
+    !$OMP DO
+    DO I=1,KMAXE
+      IF (IELEM(N,I)%RECALC.EQ.1) THEN
+        OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
+        U_C(I)%VAL(1,1:NOF_VARIABLES)=U_C(I)%VAL(2,1:NOF_VARIABLES)-(DT*(RHS(I)%VAL(1:NOF_VARIABLES)*OOVOLUME))
+        IELEM(N,I)%MOOD_O=1
+      ELSE
+        U_C(I)%VAL(1,1:NOF_VARIABLES)=U_C(I)%VAL(4,1:NOF_VARIABLES)
+      END IF
+    END DO
+    !$OMP END DO
+  END IF
+
+  IF (FASTEST.EQ.1)THEN
+      CALL EXCHANGE_LOWER(N)
+      CALL ARBITRARY_ORDER(N)
+      CALL EXHBOUNDHIGHER(N)
+      SELECT CASE(ITESTCASE)
+        CASE(1,2)
+          CALL CALCULATE_FLUXESHI2D(N)
+        CASE(3)
+          CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
+        CASE(4)
+          CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
+          CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+          IF (turbulence.eq.1)THEN
+              CALL SOURCES_COMPUTATION2d(N)
+          END IF
+      END SELECT
+  ELSE
+      CALL EXCHANGE_HIGHER(N)
+      CALL ARBITRARY_ORDER(N)
+      CALL EXHBOUNDHIGHER(N)
+      SELECT CASE(ITESTCASE)
+        CASE(1,2)
+            CALL CALCULATE_FLUXESHI2D(N)
+        CASE(3)
+            CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
+        CASE(4)
+          CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
+          CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+          IF (turbulence.eq.1)THEN
+              CALL SOURCES_COMPUTATION2d(N)
+          END IF
+      END SELECT
+  END IF
+
+  !$OMP DO
+  DO I=1,KMAXE
+    OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
+    U_C(I)%VAL(3,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
+    U_C(I)%VAL(inds,1:NOF_VARIABLES)=(TO4*U_C(I)%VAL(2,1:NOF_VARIABLES))+(OO4*U_C(I)%VAL(3,1:NOF_VARIABLES))-(((OO4))*((DT)*&
+      ((RHS(I)%VAL(1:NOF_VARIABLES))*(OOVOLUME))))
+  END DO
+  !$OMP END DO
+
+  IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
+    !$OMP DO
+    DO I=1,KMAXE
+      OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
+      U_Ct(I)%VAL(3,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)
+      U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=(TO4*U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar))+(OO4*U_Ct(I)%VAL(3,1:turbulenceequations+passivescalar))-(((OO4))*((DT)*&
+        ((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
+    END DO
+    !$OMP END DO
+  END IF
+
+  IF (MOOD.EQ.1)THEN
+  
+    CALL MOOD_OPERATOR_2(N)
+    !$OMP DO
+    DO I=1,KMAXE
+      IF (IELEM(N,I)%RECALC.EQ.1)THEN
+        OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
+        U_C(I)%VAL(INDS,1:NOF_VARIABLES)=(TO4*U_C(I)%VAL(2,1:NOF_VARIABLES))+(OO4*U_C(I)%VAL(3,1:NOF_VARIABLES))-(((OO4))*((DT)*&
+          ((RHS(I)%VAL(1:NOF_VARIABLES))*(OOVOLUME))))
+        IELEM(N,I)%MOOD_O=2
+      END IF
+    END DO
+    !$OMP END DO
+
+    CALL MOOD_OPERATOR_1(N)
+
+    !$OMP DO
+    DO I=1,KMAXE
+      IF (IELEM(N,I)%RECALC.EQ.1)THEN
+        OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
+        U_C(I)%VAL(1,1:NOF_VARIABLES)=(TO4*U_C(I)%VAL(2,1:NOF_VARIABLES))+(OO4*U_C(I)%VAL(3,1:NOF_VARIABLES))-(((OO4))*((DT)*&
+          ((RHS(I)%VAL(1:NOF_VARIABLES))*(OOVOLUME))))
+        IELEM(N,I)%MOOD_O=1
+      ELSE
+        U_C(I)%VAL(1,1:NOF_VARIABLES)=U_C(I)%VAL(4,1:NOF_VARIABLES)
+      END IF
+    END DO
+    !$OMP END DO
+  END IF
+ 
+  IF (FASTEST.EQ.1)THEN
+      CALL EXCHANGE_LOWER(N)
+      CALL ARBITRARY_ORDER(N)
+      CALL EXHBOUNDHIGHER(N)
+      SELECT CASE(ITESTCASE)
+        CASE(1,2)
+          CALL CALCULATE_FLUXESHI2D(N)
+        CASE(3)
+          CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
+        CASE(4)
+          CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
+          CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+          IF (turbulence.eq.1)THEN
+              CALL SOURCES_COMPUTATION2d(N)
+          END IF
+      END SELECT
+  ELSE
+      CALL EXCHANGE_HIGHER(N)
+      CALL ARBITRARY_ORDER(N)
+      CALL EXHBOUNDHIGHER(N)
+      SELECT CASE(ITESTCASE)
+        CASE(1,2)
+          CALL CALCULATE_FLUXESHI2D(N)
+        CASE(3)
+          CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
+        CASE(4)
+          CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
+          CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+          IF (turbulence.eq.1)THEN
+              CALL SOURCES_COMPUTATION2d(N)
+          END IF
+          CALL VORTEXCALC2D(N)
+      END SELECT
+  END IF
+  !$OMP DO
+  DO I=1,KMAXE
+    OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
+    IF (MOOD.EQ.1)THEN
+      U_C(I)%VAL(3,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
+    END IF
+    U_C(I)%VAL(INDS,1:NOF_VARIABLES)=((OO3)*U_C(I)%VAL(2,1:NOF_VARIABLES))+((TO3)*U_C(I)%VAL(1,1:NOF_VARIABLES))-(((TO3))*&
+      ((DT)*((RHS(I)%VAL(1:NOF_VARIABLES))*(OOVOLUME))))
+  END DO
+  !$OMP END DO
+
+
+  IF (MOOD.EQ.1)THEN
+
+    CALL MOOD_OPERATOR_2(N)
+    !$OMP DO
+    DO I=1,KMAXE
+      IF (IELEM(N,I)%RECALC.EQ.1) THEN
+        OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
+        U_C(I)%VAL(INDS,1:NOF_VARIABLES)=((OO3)*U_C(I)%VAL(2,1:NOF_VARIABLES))+((TO3)*U_C(I)%VAL(1,1:NOF_VARIABLES))-(((TO3))*&
+          ((DT)*((RHS(I)%VAL(1:NOF_VARIABLES))*(OOVOLUME))))
+        IELEM(N,I)%MOOD_O=2
+      END IF
+    END DO
+    !$OMP END DO
+
+    CALL MOOD_OPERATOR_1(N)
+
+    !$OMP DO
+    DO I=1,KMAXE
+      IF (IELEM(N,I)%RECALC.EQ.1)THEN
+        OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
+        U_C(I)%VAL(1,1:NOF_VARIABLES)=((OO3)*U_C(I)%VAL(2,1:NOF_VARIABLES))+((TO3)*U_C(I)%VAL(1,1:NOF_VARIABLES))-(((TO3))*&
+          ((DT)*((RHS(I)%VAL(1:NOF_VARIABLES))*(OOVOLUME))))
+        IELEM(N,I)%MOOD_O=1
+      ELSE
+        U_C(I)%VAL(1,1:NOF_VARIABLES)=U_C(I)%VAL(4,1:NOF_VARIABLES)
+      END IF
+    END DO
+    !$OMP END DO
+  END IF
+
+
+  IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
+    !$OMP DO
+    DO I=1,KMAXE
+      OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
+      U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=((OO3)*U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar))+((TO3)*U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar))-(((TO3))*&
+        ((DT)*((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
+    END DO
+    !$OMP END DO
+  END IF
+
+  IF (AVERAGING.EQ.1)THEN
+    CALL AVERAGING_T(N)
+  END IF
 
 END SUBROUTINE RUNGE_KUTTA3_2D_MOOD
 
@@ -1830,8 +1828,6 @@ IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
   END DO
   !$OMP END DO
 END IF
- 
- 
  
  
 IF (statistics.eq.1)THEN
@@ -1977,7 +1973,6 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-
 IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
   !$OMP DO
   DO I=1,KMAXE
@@ -1992,7 +1987,6 @@ END IF
 IF (AVERAGING.EQ.1)THEN
   CALL AVERAGING_T(N)
 END IF
-
 
 END SUBROUTINE RUNGE_KUTTA4
 
@@ -3726,7 +3720,6 @@ SUBROUTINE TIME_MARCHING(N)
       ! END IF
       END IF
            
-<<<<<<< HEAD
       ! IF ((initcond.eq.405).or.(initcond.eq.422).or.(initcond.eq.411).or.(initcond.eq.157))THEN
       !     IF ( mod(it, 1) .eq. 0)THEN
       !         CALL TRAJECTORIES
@@ -3734,64 +3727,6 @@ SUBROUTINE TIME_MARCHING(N)
       !	END IF
       
       !$OMP END MASTER 
-=======
- 			    IF ((initcond.eq.405).or.(initcond.eq.422).or.(initcond.eq.411).or.(initcond.eq.157))THEN
-! 			    IF ( mod(it, 1) .eq. 0)THEN
-                                 CALL TRAJECTORIES
-! 			    END IF
- 			    END IF
-			
-			
-			
-			!$OMP END MASTER 
-			!$OMP BARRIER
-			
-			IF ( mod(it, IForce) .eq. 0) THEN
-			IF (OUTSURF.EQ.1) THEN   
-			
-				  CALL forces
-			END IF
-			END IF
-			
-			IF ((rungekutta.ge.5).and.(rungekutta.lt.11))THEN
-			IF ( mod(it, residualfreq) .eq. 0) THEN
-			
-                               CALL RESIDUAL_COMPUTE
-			END IF
-			END IF
-			
-			
-			
-		
-			
-			
-			
-			!$OMP MASTER
-			IF (NPROBES.GT.0) CALL PROBING
-					
-			
-			IF (TIMEC1.GE.IEVERY)THEN
-			
-			    CALL VOLUME_SOLUTION_WRITE
-			     IF (outsurf.eq.1)THEN
-			    CALL surface_SOLUTION_WRITE
-			    END IF
-			CPUT1=MPI_WTIME()
-			END IF
-			
-			IF (INITCOND.eq.95)THEN           
-			if (abs(T - ((IDNINT(T/output_freq)) * output_freq)).le.tolsmall) then
-			
-                CALL VOLUME_SOLUTION_WRITE
-			     if (outsurf.eq.1)then
-			    call surface_SOLUTION_WRITE
-			    end if
-			    IF (INITCOND.eq.95)THEN                    
-			    CALL CHECKPOINTv4(N)
-			    END IF
-			EVERY_TIME=EVERY_TIME+output_freq
-            END IF
->>>>>>> refs/remotes/origin/master
 
       !$OMP BARRIER
 			
@@ -4058,24 +3993,24 @@ SUBROUTINE TIME_MARCHING2(N)
           CALL RUNGE_KUTTA2_2d(N)
 
         CASE(3)
-          IF (MOOD.EQ.1)THEN
+          IF (hybridCWENO_MOOD.gt.0) then
+              IWENO=0
+              CALL RUNGE_KUTTA3_2D_hybridCWENO_MOOD(N)
+          ELSE IF (MOOD.EQ.1)THEN
               CALL RUNGE_KUTTA3_2D_MOOD(N)
           ELSE
               CALL RUNGE_KUTTA3_2D(N)
           END IF
 
-<<<<<<< HEAD
         CASE(4)
           CALL RUNGE_KUTTA4_2D(N)
-=======
-     IF ((MULTISPECIES.EQ.1))THEN
-         IF((initcond.eq.405).or.(initcond.eq.411))THEN
-            ! IF ( mod(it, 20) .eq. 0)THEN
-                 CALL TRAJECTORIES
-            ! END IF
-         END IF
-     END IF
->>>>>>> refs/remotes/origin/master
+          ! IF ((MULTISPECIES.EQ.1))THEN
+          !     IF((initcond.eq.405).or.(initcond.eq.411))THEN
+          !         ! IF ( mod(it, 20) .eq. 0)THEN
+          !             CALL TRAJECTORIES
+          !         ! END IF
+          !     END IF
+          ! END IF
 
         CASE(5)
           CALL RUNGE_KUTTA5_2D(N)
@@ -4113,7 +4048,7 @@ SUBROUTINE TIME_MARCHING2(N)
           END IF
       END IF
 
-      IF (mood.gt.0)THEN
+      IF ((mood.gt.0).or.(hybridCWENO_MOOD.gt.0)) THEN
           CALL TROUBLED_HISTORY
       end if
 

@@ -202,6 +202,7 @@ SUBROUTINE COMPUTE_GRADIENTS_MEAN_LSQ(N,ICONSIDERED,NUMBER_OF_DOG,NUMBER_OF_NEI)
 	REAL::MP_PINFl,GAMMAL
 	INTEGER::I,VAR2,iq,ll,IMAX
 	REAL::TEMPXX
+	integer::loop_start,loop_end
 
 	I=ICONSIDERED
 
@@ -221,10 +222,24 @@ SUBROUTINE COMPUTE_GRADIENTS_MEAN_LSQ(N,ICONSIDERED,NUMBER_OF_DOG,NUMBER_OF_NEI)
 		SOLS1(1:NOF_VARIABLES)=LEFTV(1:NOF_VARIABLES)
 	END IF
 	
+
+	loop_start = 1
+	loop_end = IELEM(N,I)%ADMIS
+	if (hybridCWENO_MOOD.gt.0) then
+		if (IELEM(N,I)%MOOD.eq.1) then
+			loop_start = 2
+			loop_end = IELEM(N,I)%ADMIS
+		else
+			loop_start = 1
+			loop_end = loop_start
+		end if
+	end if
+
+
 	if (ILOCAL_RECON3(I)%LOCAL.eq.1)then
 
-		DO LL=1,IELEM(N,I)%ADMIS;
-
+		! DO LL=1,IELEM(N,I)%ADMIS;
+		DO LL=loop_start, loop_end
 			if ((ees.ne.5).or.(ll.eq.1))then
 				DO IQ=1,imax
 					SOLS2(1:nof_variables,ll)=U_C(ILOCAL_RECON3(I)%IHEXL(LL,IQ+1))%VAL(1,1:nof_variables)
@@ -262,7 +277,8 @@ SUBROUTINE COMPUTE_GRADIENTS_MEAN_LSQ(N,ICONSIDERED,NUMBER_OF_DOG,NUMBER_OF_NEI)
 				END DO
 			END IF
 		end do
-	 	DO LL=1,IELEM(N,I)%ADMIS;
+	 	! DO LL=1,IELEM(N,I)%ADMIS;
+		DO LL=loop_start, loop_end
 			if ((ees.ne.5).or.(ll.eq.1))then
 				! CALL DGEMM('N','N',IELEM(N,I)%IDEGFREE,nof_variables,imax,&
 				!          ALPHA,ILOCAL_RECON3(I)%invmat_stencilt(1:IELEM(N,I)%IDEGFREE,1:imax,LL),&
@@ -278,7 +294,8 @@ SUBROUTINE COMPUTE_GRADIENTS_MEAN_LSQ(N,ICONSIDERED,NUMBER_OF_DOG,NUMBER_OF_NEI)
 			END IF
 		end do
 	
-		DO LL=1,IELEM(N,I)%ADMIS;
+		! DO LL=1,IELEM(N,I)%ADMIS;
+		DO LL=loop_start, loop_end
 		   	if ((ees.ne.5).or.(ll.eq.1))then
 		  		ILOCAL_rECON5(ICONSIDERED)%GRADIENTS(LL,1:NUMBER_OF_DOG,1:nof_variables)=SOL_M(1:NUMBER_OF_DOG,1:nof_variables,ll)
 		  	ELSE
@@ -288,7 +305,8 @@ SUBROUTINE COMPUTE_GRADIENTS_MEAN_LSQ(N,ICONSIDERED,NUMBER_OF_DOG,NUMBER_OF_NEI)
 	
 	else
 	
-		DO LL=1,IELEM(N,I)%ADMIS;
+		!DO LL=1,IELEM(N,I)%ADMIS;
+		DO LL=loop_start, loop_end
 			if ((ees.ne.5).or.(ll.eq.1))then
 				DO IQ=1,imax
 	
@@ -340,7 +358,8 @@ SUBROUTINE COMPUTE_GRADIENTS_MEAN_LSQ(N,ICONSIDERED,NUMBER_OF_DOG,NUMBER_OF_NEI)
 
 		end do
 	
-		DO LL=1,IELEM(N,I)%ADMIS;
+		! DO LL=1,IELEM(N,I)%ADMIS;
+		DO LL=loop_start, loop_end
 			if ((ees.ne.5).or.(ll.eq.1))then
 				! CALL DGEMM('N','N',IELEM(N,I)%IDEGFREE,nof_variables,imax,&
 				!          ALPHA,ILOCAL_RECON3(I)%invmat_stencilt(1:IELEM(N,I)%IDEGFREE,1:imax,LL),&
@@ -357,7 +376,8 @@ SUBROUTINE COMPUTE_GRADIENTS_MEAN_LSQ(N,ICONSIDERED,NUMBER_OF_DOG,NUMBER_OF_NEI)
 			END IF
 		end do
 
-		DO LL=1,IELEM(N,I)%ADMIS;
+		! DO LL=1,IELEM(N,I)%ADMIS;
+		DO LL=loop_start, loop_end
 			if ((ees.ne.5).or.(ll.eq.1))then
 				ILOCAL_rECON5(ICONSIDERED)%GRADIENTS(LL,1:NUMBER_OF_DOG,1:nof_variables)=SOL_M(1:NUMBER_OF_DOG,1:nof_variables,ll)
 			ELSE

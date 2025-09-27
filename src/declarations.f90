@@ -118,6 +118,7 @@ INTEGER::ZERO_TURB_INIT				!FLAG FOR TYPE OF INITIALIZATION FOR K-OMEGA
 INTEGER::DES_MODEL 				!INTEGER SWITCHES FOR SST
 INTEGER:: NPROBES,totwalls,NOF_INTERIOR,NOF_BOUNDED,MRF			!NUMBER OF PROBES FOR TRANSIENT DATA
 INTEGER:: ROT_CORR,D_CORR   !integer for turbulence corrections
+INTEGER::hybridCWENO_MOOD   !hybrid CWENO/MOOD mode - for test purposes only
 !--------------------- variables for parallel partitioned output-------!
 INTEGER,ALLOCATABLE,DIMENSION(:)::DISPART1,DISPART2,DISPART3,DISPART4,DISPART5,TYP_NODESN,TYP_NODESN_w
 INTEGER,ALLOCATABLE,DIMENSION(:)::iARRAY_PART1,iARRAY_PART2,iARRAY_PART3,iARRAY_PART4,iARRAY_PART5,i_ARRAY_PART2x
@@ -330,9 +331,10 @@ REAL,DIMENSION(7)::ALLRES,INITIALRES
 REAL,dimension(100,3)::bubble_centre
 real,dimension(100)::bubble_radius
 INTEGER::NOF_BUBBLES
-
-real::max_entropy
-real::global_max_entropy
+real::my_max_cell_area
+real::max_cell_area
+! real::max_entropy
+! real::global_max_entropy
 
 real:: momentx,momenty,momentz
 !--------------------------------------------------------------------------------------------------------------------------!

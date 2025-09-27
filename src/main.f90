@@ -33,8 +33,11 @@ USE implicit_FLUXES
 USE MOODR
 USE OMP_LIB
 USE PARAMETERS
+USE hybridCWENO_MOOD_module
 
 IMPLICIT NONE
+
+integer::iterator,cell_index
 
 EXTERNAL METIS_PartMeshDual
 EXTERNAL ParMETIS_V3_PartMeshKway
@@ -43,6 +46,7 @@ EXTERNAL ParMETIS_V3_PartMeshKway
 CALL MPI_INIT_THREAD(MPI_THREAD_FUNNELED,PROVIDED,IERROR)
 CALL MPI_COMM_SIZE(MPI_COMM_WORLD,ISIZE,IERROR)
 CALL MPI_COMM_RANK(MPI_COMM_WORLD,N,IERROR)
+
 
 CALL OPEN_INPUT1(N,ITT) !> Open the input files
 
@@ -642,7 +646,22 @@ call local_reconallocation5(n)
 
 !end if
 
-max_entropy = -1000000000.0
+! max_entropy = -1000000000.0
+my_max_cell_area = -1.0
+DO iterator=1,NOF_INTERIOR
+    cell_index=EL_INT(iterator)
+    if (my_max_cell_area < (IELEM(N,cell_index)%TOTVOLUME)) then
+        my_max_cell_area = IELEM(N,cell_index)%TOTVOLUME
+    end if
+END DO
+DO iterator=1,NOF_BOUNDED
+    cell_index=EL_BND(iterator)
+    if (my_max_cell_area < IELEM(N,cell_index)%TOTVOLUME) then
+        my_max_cell_area = IELEM(N,cell_index)%TOTVOLUME
+    end if
+END DO
+CALL MPI_ALLREDUCE(my_max_cell_area,max_cell_area,1,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IERROR)
+if (n.eq.0)  WRITE(*,*)"MAX CELL AREA =",max_cell_area
 
 IF (DIMENSIONA.EQ.3)THEN
     !$OMP PARALLEL DEFAULT(SHARED)
@@ -656,10 +675,10 @@ END IF
 
 CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
 CPUX3(1) = MPI_Wtime()
-CALL MPI_ALLREDUCE(max_entropy,global_max_entropy,1,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IERROR)
+! CALL MPI_ALLREDUCE(max_entropy,global_max_entropy,1,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IERROR)
 
 if (n.eq.0)  WRITE(100+N,*)"TOTAL TIME TAKEN=",CPUX3(1)-CPUX2(1),"SECONDS"
-if (n.eq.0)  WRITE(*,*)"MAX ENTROPY =",global_max_entropy
+! if (n.eq.0)  WRITE(*,*)"MAX ENTROPY =",global_max_entropy
 
 CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
 CALL MPI_FINALIZE(IERROR)

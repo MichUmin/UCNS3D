@@ -1574,23 +1574,19 @@ Valuelocation(:)=0
 			
 			
                 
-                IF (MOOD.EQ.1)THEN
-                DO I=1,KMAXE
-                VALUESS(i)=IELEM(N,I)%MOOD_O
-                END DO
+                IF ((MOOD.EQ.1).or.(hybridCWENO_MOOD.gt.0)) THEN
+                	DO I=1,KMAXE
+                		VALUESS(i)=IELEM(N,I)%MOOD_O
+                	END DO
                 ELSE
-                DO I=1,KMAXE
-                IF (ADDA.EQ.1)THEN
-
-                VALUESS(i)=IELEM(N,I)%lwcx2!DISS!IELEM(N,I)%STENCIL_DIST
-
-                ELSE
-                VALUESS(i)=IELEM(N,I)%ggs!WCX(1)!TROUBLED!FILTERED
-
+                	DO I=1,KMAXE
+                		IF (ADDA.EQ.1)THEN
+                			VALUESS(i)=IELEM(N,I)%lwcx2!DISS!IELEM(N,I)%STENCIL_DIST
+                		ELSE
+                			VALUESS(i)=IELEM(N,I)%ggs!WCX(1)!TROUBLED!FILTERED
+                		END IF
+                	END DO
                 END IF
-                END DO
-                END IF
-                
                 
                 call MPI_GATHERv(valuess,xmpiall(n),MPI_DOUBLE_PRECISION,xbin2,xmpiall,offset,mpi_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERROR)
 			IF (N.EQ.0)THEN
@@ -2082,83 +2078,56 @@ Valuelocation(1:3)=1
                     
 			else
 			
-			
-                
-                IF (MOOD.EQ.1)THEN
-                DO I=1,KMAXE
-                VALUESS(i)=IELEM(N,I)%MOOD_O
-                END DO
-                ELSE
-                DO I=1,KMAXE
-                VALUESS(i)=ielem(n,i)%condition!IELEM(N,I)%STENCIL_DIST
-                END DO
+                IF ((MOOD.EQ.1).or.(hybridCWENO_MOOD.gt.0)) THEN
+					DO I=1,KMAXE
+						VALUESS(i)=IELEM(N,I)%MOOD_O
+					END DO
+				ELSE
+					DO I=1,KMAXE
+						VALUESS(i)=ielem(n,i)%condition!IELEM(N,I)%STENCIL_DIST
+					END DO
                 END IF
                 
-                
-                
-			ierr = TECDAT112(kmaxe,VALUESS,1)
+				ierr = TECDAT112(kmaxe,VALUESS,1)
 			
-            
-                
-               
-                
-                
                 DO I=1,KMAXE
-                VALUESS(i)=IELEM(N,I)%ADMIS
+                	VALUESS(i)=IELEM(N,I)%ADMIS
                 END DO
                 
-                
-			ierr = TECDAT112(kmaxe,VALUESS,1)
+				ierr = TECDAT112(kmaxe,VALUESS,1)
 			
-
-              end if  
+            end if  
 		
     
-		  if (passivescalar.gt.0)then
-		  DO I=1,KMAXE
-		      VALUESS(i)=U_CT(I)%VAL(1,turbulenceequations+passivescalar)
-		  END DO
+		  	if (passivescalar.gt.0)then
+		  		DO I=1,KMAXE
+		      		VALUESS(i)=U_CT(I)%VAL(1,turbulenceequations+passivescalar)
+		  		END DO
 		  
-		  
-		  
-			ierr = TECDAT112(kmaxe,VALUESS,1)
-			
-		  
-		  
-		  end if
+				ierr = TECDAT112(kmaxe,VALUESS,1)
+		  	end if
     
-		  if (itestcase.eq.4)then
-		  DO I=1,KMAXE
-		      VALUESS(i)=ielem(n,i)%vortex(1)!%inumneighbours
-		  END DO
-		  
-		  
+		  	if (itestcase.eq.4)then
+		  		DO I=1,KMAXE
+		      		VALUESS(i)=ielem(n,i)%vortex(1)!%inumneighbours
+		  		END DO
 		
-		ierr = TECDAT112(kmaxe,VALUESS,1)
+				ierr = TECDAT112(kmaxe,VALUESS,1)
 			
 		  
-		  if (turbulence.eq.1)then
-		  do kkd=1,turbulenceequations
-			DO I=1,KMAXE
-			    VALUESS(i)=U_CT(I)%VAL(1,kkd)
-			END DO
-		      
-			
-		      
-		ierr = TECDAT112(kmaxe,VALUESS,1)
-			      
-
-
-		 end do
-		  end if
-		  
-		  
-		  
-		  
-		  end if
+		  		if (turbulence.eq.1)then
+		  			do kkd=1,turbulenceequations
+						DO I=1,KMAXE
+			    			VALUESS(i)=U_CT(I)%VAL(1,kkd)
+						END DO
+		    
+						ierr = TECDAT112(kmaxe,VALUESS,1)
+		 			end do
+		  		end if
+		  	end if
     
     
-    end if
+    	end if
     
 
     do i=1,kmaxe
@@ -2172,18 +2141,11 @@ Valuelocation(1:3)=1
   
   
   DEALLOCATE (VALUESS,VARIABLES)
-  
-
-  
-
-
-
-
-
-	
-	
 
 END SUBROUTINE OUTWRITEtec3dbp
+
+
+
 
 
 SUBROUTINE OUTWRITEtec3dbpav
@@ -2547,59 +2509,41 @@ Valuelocation(1:3)=1
                     
 			else
 			
-			
-                
-                IF (MOOD.EQ.1)THEN
-                DO I=1,KMAXE
-                VALUESS(i)=IELEM(N,I)%MOOD_O
-                END DO
+                IF ((MOOD.EQ.1).or.(hybridCWENO_MOOD.gt.0))THEN
+                	DO I=1,KMAXE
+                		VALUESS(i)=IELEM(N,I)%MOOD_O
+                	END DO
                 ELSE
-                DO I=1,KMAXE
-                VALUESS(i)=ielem(n,i)%condition!IELEM(N,I)%STENCIL_DIST
-                END DO
+                	DO I=1,KMAXE
+                		VALUESS(i)=ielem(n,i)%condition!IELEM(N,I)%STENCIL_DIST
+                	END DO
                 END IF
                 
-                
-                
-			ierr = TECDAT112(kmaxe,VALUESS,1)
+				ierr = TECDAT112(kmaxe,VALUESS,1)
 			
-            
-                
-               
-                
-                
                 DO I=1,KMAXE
-                VALUESS(i)=IELEM(N,I)%ADMIS
+                	VALUESS(i)=IELEM(N,I)%ADMIS
                 END DO
                 
-                
-			ierr = TECDAT112(kmaxe,VALUESS,1)
+				ierr = TECDAT112(kmaxe,VALUESS,1)
 			
-
-              end if  
+            end if  
 		
     
-		  if (passivescalar.gt.0)then
-		  DO I=1,KMAXE
-		      VALUESS(i)=U_CT(I)%VAL(1,turbulenceequations+passivescalar)
-		  END DO
-		  
-		  
-		  
-			ierr = TECDAT112(kmaxe,VALUESS,1)
-			
-		  
-		  
-		  end if
-    
-		  if (itestcase.eq.4)then
-		  DO I=1,KMAXE
-		      VALUESS(i)=ielem(n,i)%vortex(1)!%inumneighbours
-		  END DO
-		  
-		  
+		  	if (passivescalar.gt.0)then
+		  		DO I=1,KMAXE
+		      		VALUESS(i)=U_CT(I)%VAL(1,turbulenceequations+passivescalar)
+		  		END DO
 		
-		ierr = TECDAT112(kmaxe,VALUESS,1)
+				ierr = TECDAT112(kmaxe,VALUESS,1)
+		  	end if
+    
+		  	if (itestcase.eq.4)then
+		  		DO I=1,KMAXE
+		      		VALUESS(i)=ielem(n,i)%vortex(1)!%inumneighbours
+		  		END DO
+		
+				ierr = TECDAT112(kmaxe,VALUESS,1)
 			
 		  
 		  if (turbulence.eq.1)then
@@ -3926,31 +3870,30 @@ allocate(xbin(1:imaxe),xbin2(1:imaxe))
 		end do
 		ierr = TECDAT112(imaxe,xbin,1)
 		END IF
-                if (multispecies.eq.1)then
+            if (multispecies.eq.1)then
                 DO I=1,KMAXE
-                VALUESS(i)=U_C(I)%VAL(1,6)
+                	VALUESS(i)=U_C(I)%VAL(1,6)
                 END DO
-                else
-                IF (MOOD.EQ.1)THEN
-                DO I=1,KMAXE
-                VALUESS(i)=IELEM(N,I)%MOOD_O
-                END DO
+            else
+                IF ((MOOD.EQ.1).or.(hybridCWENO_MOOD.gt.0)) THEN
+                	DO I=1,KMAXE
+                		VALUESS(i)=IELEM(N,I)%MOOD_O
+                	END DO
                 ELSE
-                
-                DO I=1,KMAXE
-                VALUESS(i)=IELEM(N,I)%TROUBLED
-                END DO
+                	DO I=1,KMAXE
+                		VALUESS(i)=IELEM(N,I)%TROUBLED
+                	END DO
                 END IF
-                end if
+            end if
                 
                 
-               call MPI_GATHERv(valuess,xmpiall(n),MPI_DOUBLE_PRECISION,xbin2,xmpiall,offset,mpi_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERROR)
+            call MPI_GATHERv(valuess,xmpiall(n),MPI_DOUBLE_PRECISION,xbin2,xmpiall,offset,mpi_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERROR)
 
 		IF (N.EQ.0)THEN
-		do i=1,imaxe
-		xbin(XMPI_RE(I))=xbin2(I)
-		end do
-		ierr = TECDAT112(imaxe,xbin,1)
+			do i=1,imaxe
+				xbin(XMPI_RE(I))=xbin2(I)
+			end do
+			ierr = TECDAT112(imaxe,xbin,1)
 		END IF
 
                 
@@ -3958,37 +3901,21 @@ allocate(xbin(1:imaxe),xbin2(1:imaxe))
 		
 		
     
-		  if (passivescalar.gt.0)then
-		  DO I=1,KMAXE
-		      VALUESS(i)=U_CT(I)%VAL(1,turbulenceequations+passivescalar)
-		  END DO
-		  
-		  
-		 call MPI_GATHERv(valuess,xmpiall(n),MPI_DOUBLE_PRECISION,xbin2,xmpiall,offset,mpi_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERROR)
+		if (passivescalar.gt.0)then
+		  	DO I=1,KMAXE
+		      	VALUESS(i)=U_CT(I)%VAL(1,turbulenceequations+passivescalar)
+		  	END DO
+		
+		 	call MPI_GATHERv(valuess,xmpiall(n),MPI_DOUBLE_PRECISION,xbin2,xmpiall,offset,mpi_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERROR)
 
-		IF (N.EQ.0)THEN
-		do i=1,imaxe
-		xbin(XMPI_RE(I))=xbin2(I)
-		end do
-		ierr = TECDAT112(imaxe,xbin,1)
-		END IF
-		  
-		  
-		  
-		  
-		  
-		  
-		  
-		  
-		  
-		  
-		  
-		  
-		  
-		  
-		  
-		  
-		  end if
+			IF (N.EQ.0)THEN
+				do i=1,imaxe
+					xbin(XMPI_RE(I))=xbin2(I)
+				end do
+				ierr = TECDAT112(imaxe,xbin,1)
+			END IF
+		
+		end if
 		  
 		  
 		   if (itestcase.eq.3)then
@@ -4015,34 +3942,31 @@ allocate(xbin(1:imaxe),xbin2(1:imaxe))
 		
 		
 		if (multispecies.eq.1)then
-		IF (MOOD.EQ.1)THEN
+			IF ((MOOD.EQ.1).or.(hybridCWENO_MOOD.gt.0)) THEN
                 DO I=1,KMAXE
-                VALUESS(i)=IELEM(N,I)%MOOD_O
+                	VALUESS(i)=IELEM(N,I)%MOOD_O
                 END DO
                 call MPI_GATHERv(valuess,xmpiall(n),MPI_DOUBLE_PRECISION,xbin2,xmpiall,offset,mpi_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERROR)
                 IF (N.EQ.0)THEN
-                do i=1,imaxe
-                xbin(XMPI_RE(I))=xbin2(I)
-                end do
-                ierr = TECDAT112(imaxe,xbin,1)
+                	do i=1,imaxe
+                		xbin(XMPI_RE(I))=xbin2(I)
+                	end do
+                	ierr = TECDAT112(imaxe,xbin,1)
                 END IF
-        else
+        	else
                 DO I=1,KMAXE
-                VALUESS(i)=IELEM(N,I)%REDUCE
+                	VALUESS(i)=IELEM(N,I)%REDUCE
                 END DO
                 call MPI_GATHERv(valuess,xmpiall(n),MPI_DOUBLE_PRECISION,xbin2,xmpiall,offset,mpi_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERROR)
                 IF (N.EQ.0)THEN
-                do i=1,imaxe
-                xbin(XMPI_RE(I))=xbin2(I)
-                end do
-                ierr = TECDAT112(imaxe,xbin,1)
+                	do i=1,imaxe
+                		xbin(XMPI_RE(I))=xbin2(I)
+                	end do
+                	ierr = TECDAT112(imaxe,xbin,1)
                 END IF
-        
-        
-        
+        	end if
         end if
-        end if
-		  end if
+	end if
     
 		  if (itestcase.eq.4)then
                             DO I=1,KMAXE
@@ -14947,7 +14871,7 @@ if (dimensiona.eq.2)then
 		rARRAY_PART1(i,1:NOF_VARIABLES)=leftv(1:nof_Variables)
 		do j=nof_Variables+1,write_variables-TURBULENCEEQUATIONS
 			! different reduced order indicators or voirticity if none
-			if (mood.eq.1) then
+			if ((mood.eq.1).or.(hybridCWENO_MOOD.gt.0)) then
 				rARRAY_PART1(i,j)=ielem(n,i)%mood_o
 			else
 				if (multispecies.eq.1)then
@@ -22648,146 +22572,116 @@ END SUBROUTINE CHECKPOINTv3
 
 
 SUBROUTINE TROUBLED_HISTORY
-INTEGER::I,J,K,TRAJ1,TRAJ2,TRAJ3,TRAJ4,kmaxe,writeid,writeconf
-REAL::WIN1,WIN2,WIN3,WIN4,POST,POST1,POST2,POST3,POST4
-real,dimension(3)::pos_l,pos_g
-integer,dimension(3)::ipos_l,ipos_g
-KMAXE=XMPIELRANK(N)
-POST1=0
-traj1=0
-pos_l(1)=zero
-pos_G(1)=zero
-ipos_l(:)=0
-ipos_G(:)=0
+	INTEGER::I,J,K,TRAJ1,TRAJ2,TRAJ3,TRAJ4,kmaxe,writeid,writeconf
+	REAL::WIN1,WIN2,WIN3,WIN4,POST,POST1,POST2,POST3,POST4
+	real,dimension(3)::pos_l,pos_g
+	integer,dimension(3)::ipos_l,ipos_g
+	KMAXE=XMPIELRANK(N)
+	POST1=0
+	traj1=0
+	pos_l(1)=zero
+	pos_G(1)=zero
+	ipos_l(:)=0
+	ipos_G(:)=0
 
-if (mood.gt.0)then
+	if ((mood.gt.0).or.(hybridCWENO_MOOD.gt.0))then
 
-DO I=1,KMAXE
-	if (IELEM(N,I)%mood_o.lt.(iorder+1))then
-    ipos_l(1)=ipos_l(1)+1		!number of cells
-    end if
-    if (IELEM(N,I)%mood_o.EQ.1)then
-    ipos_l(2)=ipos_l(2)+1
-    end if
-END DO
+		DO I=1,KMAXE
+			if (IELEM(N,I)%mood_o.lt.(iorder+1))then
+				ipos_l(1)=ipos_l(1)+1		!number of cells
+			end if
+			if (IELEM(N,I)%mood_o.EQ.1)then
+				ipos_l(2)=ipos_l(2)+1
+			end if
+		END DO
 
+		CALL MPI_ALLREDUCE(Ipos_l(1:2),Ipos_g(1:2),2,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERROR)
 
-CALL MPI_ALLREDUCE(Ipos_l(1:2),Ipos_g(1:2),2,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERROR)
+		POS_G(1)=IPOS_G(1)
+		POS_G(2)=IPOS_G(2)
+		POS_G(1)=(POS_G(1)/IMAXE)*100
+		POS_G(2)=(POS_G(2)/IMAXE)*100
 
-POS_G(1)=IPOS_G(1)
-POS_G(2)=IPOS_G(2)
-POS_G(1)=(POS_G(1)/IMAXE)*100
-POS_G(2)=(POS_G(2)/IMAXE)*100
+		IF (n.eq.0)THEN
+			OPEN(70,FILE='TROUBLED.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
+			WRITE(70,'(E14.7,1X,E14.7,1X,E14.7)')T,POS_G(1),POS_G(2)
+			close(70)
+		END IF
 
-IF (n.eq.0)THEN
+		CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
 
-OPEN(70,FILE='TROUBLED.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
-WRITE(70,'(E14.7,1X,E14.7,1X,E14.7)')T,POS_G(1),POS_G(2)
-close(70)
+	eLSE
 
-END IF
+		DO I=1,KMAXE
+			pos_l(1)=pos_l(1)+IELEM(N,I)%CONDITION
+		END DO
+	
+		CALL MPI_ALLREDUCE(pos_l(1),pos_g(1),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
 
-CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
+		IF (n.eq.0)THEN
+			OPEN(70,FILE='TROUBLED.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
+			WRITE(70,'(E14.7,1X,E14.7,1X,E14.7)')T,(POS_G(1)/IMAXE)*100.0
+			close(70)
+		END IF
 
+		CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
 
-
-
-
-
-eLSE
-
-DO I=1,KMAXE
-    pos_l(1)=pos_l(1)+IELEM(N,I)%CONDITION
-END DO
-
-  
-CALL MPI_ALLREDUCE(pos_l(1),pos_g(1),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
-
-IF (n.eq.0)THEN
-
-OPEN(70,FILE='TROUBLED.dat',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
-WRITE(70,'(E14.7,1X,E14.7,1X,E14.7)')T,(POS_G(1)/IMAXE)*100.0
-close(70)
-
-END IF
-
-CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
-
-
-end if
-
-  
-
-
-
-
-
+	end if
 
 END SUBROUTINE TROUBLED_HISTORY
 
 
 SUBROUTINE REDUCED_HISTORY
-INTEGER::I,J,K,TRAJ1,TRAJ2,TRAJ3,TRAJ4,kmaxe,writeid,writeconf
-REAL::WIN1,WIN2,WIN3,WIN4,POST,POST1,POST2,POST3,POST4
-real,dimension(1)::pos_l,pos_g
-KMAXE=XMPIELRANK(N)
-POST1=0
-traj1=0
-pos_l(1)=zero
-pos_G(1)=zero
-DO I=1,KMAXE
-    pos_l(1)=pos_l(1)+IELEM(N,I)%REDUCE
-END DO
+	INTEGER::I,J,K,TRAJ1,TRAJ2,TRAJ3,TRAJ4,kmaxe,writeid,writeconf
+	REAL::WIN1,WIN2,WIN3,WIN4,POST,POST1,POST2,POST3,POST4
+	real,dimension(1)::pos_l,pos_g
+	KMAXE=XMPIELRANK(N)
+	POST1=0
+	traj1=0
+	pos_l(1)=zero
+	pos_G(1)=zero
+	DO I=1,KMAXE
+		pos_l(1)=pos_l(1)+IELEM(N,I)%REDUCE
+	END DO
 
+	CALL MPI_ALLREDUCE(pos_l(1),pos_g(1),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
 
-CALL MPI_ALLREDUCE(pos_l(1),pos_g(1),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
+	IF (n.eq.0)THEN
+		OPEN(70,FILE='REDUCED.DAT',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
+		WRITE(70,'(E14.7,1X,E14.7,1X,E14.7)')T,(POS_G(1)/IMAXE)*100.0
+		close(70)
+	END IF
 
-IF (n.eq.0)THEN
-
-OPEN(70,FILE='REDUCED.DAT',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
-WRITE(70,'(E14.7,1X,E14.7,1X,E14.7)')T,(POS_G(1)/IMAXE)*100.0
-close(70)
-
-END IF
-
-CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
-
-
+	CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
 
 END SUBROUTINE REDUCED_HISTORY
 
 
 SUBROUTINE FILTERED_HISTORY
-INTEGER::I,J,K,TRAJ1,TRAJ2,TRAJ3,TRAJ4,kmaxe,writeid,writeconf,countfd
-REAL::WIN1,WIN2,WIN3,WIN4,POST,POST1,POST2,POST3,POST4
-real,dimension(5)::pos_l,pos_g
-KMAXE=XMPIELRANK(N)
-POST1=0
-traj1=0
-pos_l(:)=zero
-pos_G(:)=zero
-! pos_L(2)=10e20
-! pos_g(2)=0
-! pos_L(3)=0.0d0
-! pos_g(3)=0
-! pos_L(4)=-10e20
-! pos_g(4)=0
-! countfd=0
-DO I=1,KMAXE
+	INTEGER::I,J,K,TRAJ1,TRAJ2,TRAJ3,TRAJ4,kmaxe,writeid,writeconf,countfd
+	REAL::WIN1,WIN2,WIN3,WIN4,POST,POST1,POST2,POST3,POST4
+	real,dimension(5)::pos_l,pos_g
+	KMAXE=XMPIELRANK(N)
+	POST1=0
+	traj1=0
+	pos_l(:)=zero
+	pos_G(:)=zero
+	! pos_L(2)=10e20
+	! pos_g(2)=0
+	! pos_L(3)=0.0d0
+	! pos_g(3)=0
+	! pos_L(4)=-10e20
+	! pos_g(4)=0
+	! countfd=0
+	DO I=1,KMAXE
 
-    pos_l(1)=pos_l(1)+IELEM(N,I)%FILTERED
+   		pos_l(1)=pos_l(1)+IELEM(N,I)%FILTERED
 
-!     if (ielem(n,i)%er2dt.gt.0)THen
-!
-!
-! 			if (ielem(n,i)%er1er2.gt.1)then
-!
-!
-! 			countfd=countfd+1
-!
-! 			pos_l(2)=min(pos_l(2),ielem(n,i)%er1er2)
-!
-! 			pos_l(3)=ielem(n,i)%er1er2+pos_l(3)
+		! if (ielem(n,i)%er2dt.gt.0)THen
+		!     if (ielem(n,i)%er1er2.gt.1)then
+		!         countfd=countfd+1
+		! 		  pos_l(2)=min(pos_l(2),ielem(n,i)%er1er2)
+		! 	      pos_l(3)=ielem(n,i)%er1er2+pos_l(3)
 !
 !
 !
@@ -22851,42 +22745,33 @@ DO I=1,KMAXE
 
 END DO
 
-! pos_l(3)=pos_l(3)/countfd
+	! pos_l(3)=pos_l(3)/countfd
 
 
-CALL MPI_ALLREDUCE(pos_l(1),pos_g(1),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
+	CALL MPI_ALLREDUCE(pos_l(1),pos_g(1),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
+
+	post1=(POS_G(1)/IMAXE)*100.0
+
+	CALL MPI_ALLREDUCE(pos_l(2),pos_g(2),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
+
+	post2=(POS_G(2)/IMAXE)
+
+	CALL MPI_ALLREDUCE(pos_l(3),pos_g(3),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
+
+	post3=(POS_G(3)/IMAXE)
+
+	CALL MPI_ALLREDUCE(pos_l(4),pos_g(4),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
+
+	post4=(POS_G(4)/IMAXE)
 
 
-post1=(POS_G(1)/IMAXE)*100.0
+	IF (n.eq.0)THEN
+		OPEN(70,FILE='FILTERED.DAT',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
+		WRITE(70,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POST1,POST2,POST3,POST4
+		close(70)
+	END IF
 
-CALL MPI_ALLREDUCE(pos_l(2),pos_g(2),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
-
-
-
-post2=(POS_G(2)/IMAXE)
-
-CALL MPI_ALLREDUCE(pos_l(3),pos_g(3),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
-
-
-post3=(POS_G(3)/IMAXE)
-
-CALL MPI_ALLREDUCE(pos_l(4),pos_g(4),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
-
-post4=(POS_G(4)/IMAXE)
-
-
-
-IF (n.eq.0)THEN
-
-OPEN(70,FILE='FILTERED.DAT',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
-WRITE(70,'(E14.7,1X,E14.7,1X,E14.7,1X,E14.7,1X,E14.7)')T,POST1,POST2,POST3,POST4
-close(70)
-
-END IF
-
-CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
-
-
+	CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
 
 END SUBROUTINE FILTERED_HISTORY
 

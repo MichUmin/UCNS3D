@@ -30,7 +30,7 @@
 *.exe
 *.out
 *.app
-src/ucns3d_p
+src/ucns3d_*
 
 # tmp directory
 

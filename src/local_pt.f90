@@ -238,7 +238,7 @@ DO I=1,INDL
             ALLOCATE(IEXBOUNDHIR(I)%FACESOL_DG(IEXCHANGER(I)%MUCHINEED(1),NOF_VARIABLES))
         END IF
         
-        if (mood.eq.1)then
+        if ((mood.eq.1).or.(hybridCWENO_MOOD.gt.0)) then
             ALLOCATE(IEXBOUNDHIR(I)%FACESOL_m(IEXCHANGER(I)%MUCHINEED(1),1))
         end if
 	ELSE
@@ -269,7 +269,7 @@ DO I=1,TNDL
             ALLOCATE(IEXBOUNDHIS(I)%FACESOL_DG(IEXCHANGEs(I)%MUCHTHEYNEED(1),NOF_VARIABLES))
         END IF
         
-        if (mood.eq.1)then
+        if ((mood.eq.1).or.(hybridCWENO_MOOD.gt.0)) then
             ALLOCATE(IEXBOUNDHIs(I)%FACESOL_m(IEXCHANGEs(I)%MUCHTHEYNEED(1),1))
         end if
 	ELSE

@@ -477,6 +477,99 @@ END SUBROUTINE WENOWEIGHTS
 
 
 
+SUBROUTINE WENOWEIGHTS_hybrid(N)
+    !> @brief
+    !> Subroutine For WENO type reconstruction in 3D
+    IMPLICIT NONE
+    INTEGER,INTENT(IN)::N
+    REAL::DIVISIONBYZERO
+    INTEGER::I,J,K,L,M,O,LL,IEX,IEUL,FACX,IELEME,KKD,KMAXE,JF,NGP,IQP,nnd,II,icd
+    INTEGER::IDUMMY,POWER,ITARGET,ICONSIDERED
+    REAL::SUMOMEGAATILDEL
+    REAL::DIVBYZERO,COMPF,checkf,tau_Weno,tempxx
+    REAL,DIMENSION(1:NUMBEROFPOINTS2)::WEIGHTS_Q,WEIGHTS_T
+    
+    
+    KMAXE=XMPIELRANK(N)
+    
+    !$OMP DO
+    DO II=1,NOF_INTERIOR;
+        I=EL_INT(II)
+        ICONSIDERED=I
+         
+        if (ielem(n,i)%MOOD.gt.0) then
+    
+            ielem(n,i)%LINC=LWCI1
+        
+            ILOCAL_RECON3(ICONSIDERED)%ULEFT(:,:,:)=ZERO
+        
+            if (poly.eq.4)then
+                divbyzero=ielem(n,iconsidered)%totvolume**2
+            else
+                divbyzero=10E-12
+            end if
+            POWER=4
+        
+            if (ADDA.EQ.1)THEN
+                CALL ADDA_FILTER(N,iconsidered)
+            END IF
+        
+            IF (WENWRT.EQ.2)THEN
+                CALL CHARACTERISTIC_RECONSTRUCTION(ICONSIDERED,IDUMMY,DIVBYZERO,POWER)
+            ELSE
+                CALL CP_RECONSTRUCTION(ICONSIDERED,IDUMMY,DIVBYZERO,POWER)
+            END IF
+        
+            IF (((TURBULENCE.EQ.1).OR.(PASSIVESCALAR.GT.0)) .and. (icoupleturb.eq.1)) THEN
+                CALL CP_RECONSTRUCTION_TURB(ICONSIDERED,IDUMMY,DIVBYZERO,POWER)
+            END IF
+
+        END IF
+    
+    END DO
+    !$OMP END DO
+    
+    !$OMP DO
+    DO II=1,NOF_BOUNDED
+        I=EL_BND(II)
+        ICONSIDERED=I
+
+        if (ielem(n,i)%RECALC.eq.1) then
+    
+            ILOCAL_RECON3(ICONSIDERED)%ULEFT(:,:,:)=ZERO
+        
+            ielem(n,i)%LINC=LWCI1
+            if (poly.eq.4)then
+                divbyzero=ielem(n,iconsidered)%totvolume**2
+            else
+                divbyzero=10E-12
+            end if
+            POWER=4
+        
+            if (ADDA.EQ.1)THEN
+                CALL ADDA_FILTER(N,iconsidered)
+            END IF
+        
+            IF (WENWRT.EQ.2)THEN
+                CALL CHARACTERISTIC_RECONSTRUCTION(ICONSIDERED,IDUMMY,DIVBYZERO,POWER)
+            Else
+                CALL CP_RECONSTRUCTION(ICONSIDERED,IDUMMY,DIVBYZERO,POWER)
+            END IF
+        
+            IF (((TURBULENCE.EQ.1).OR.(PASSIVESCALAR.GT.0)) .and. (icoupleturb.eq.1)) THEN
+                CALL CP_RECONSTRUCTION_TURB(ICONSIDERED,IDUMMY,DIVBYZERO,POWER)
+            END IF
+        END IF
+    END DO
+    !$OMP END DO
+    
+END SUBROUTINE WENOWEIGHTS_hybrid
+    
+
+
+
+
+
 SUBROUTINE CHARACTERISTIC_RECONSTRUCTION(ICONSIDERED,IDUMMY,DIVBYZERO,POWER)
 IMPLICIT NONE
 integer,intent(in)::iconsidered,POWER
