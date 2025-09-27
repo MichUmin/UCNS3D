@@ -34,7 +34,7 @@ IMPLICIT NONE
 
 REAL FUNCTION ENTROPY(RHO, P, local_gamma)
     IMPLICIT NONE
-    REAL::RHO,P, local_gamma
+    REAL, INTENT(IN) :: RHO, P, local_gamma
     ! write(*,*) "local_gamma: ", local_gamma
     ENTROPY = RHO ** local_gamma
     ENTROPY = (local_gamma - 1.0)*ENTROPY
@@ -44,8 +44,41 @@ REAL FUNCTION ENTROPY(RHO, P, local_gamma)
 
 END FUNCTION
 
+! REAL FUNCTION mixture_entropy(rho1, rho2, vf, P, gamma1, gamma2)
+!     IMPLICIT NONE
+!     REAL, intent(in) :: rho1, rho2, vf, P, gamma1, gamma2
+!     real :: entropy1, entropy2
+!     entropy1 = entropy(rho1, P, gamma1)
+!     entropy2 = entropy(rho2, P, gamma2)
+!     mixture_entropy = (vf*entropy1) + ((1.0 - vf)*entropy2)    
+! END FUNCTION
 
+! REAL FUNCTION mixture_entropy(rho1, rho2, vf, P, gamma1, gamma2)
+!     IMPLICIT NONE
+!     REAL, intent(in) :: rho1, rho2, vf, P, gamma1, gamma2
+!     real :: entropy1, entropy2
+!     entropy1 = entropy(rho1, P, gamma1)
+!     entropy2 = entropy(rho2, P, gamma2)
+!     mixture_entropy = entropy1 + entropy2
+! END FUNCTION
 
+! REAL FUNCTION mixture_entropy(rho1, rho2, vf, P, gamma1, gamma2)
+!     IMPLICIT NONE
+!     REAL, intent(in) :: rho1, rho2, vf, P, gamma1, gamma2
+!     real :: entropy1, entropy2
+!     entropy1 = entropy(rho1/vf, P, gamma1)
+!     entropy2 = entropy(rho2/(1.0 - vf), P, gamma2)
+!     mixture_entropy = vf*entropy1 + (1.0-vf)*entropy2
+! END FUNCTION
+
+REAL FUNCTION mixture_entropy(rho1, rho2, vf, P, gamma1, gamma2)
+    IMPLICIT NONE
+    REAL, intent(in) :: rho1, rho2, vf, P, gamma1, gamma2
+    real :: entropy1, entropy2
+    entropy1 = entropy(rho1/vf, P, gamma1)
+    entropy2 = entropy(rho2/(1.0 - vf), P, gamma2)
+    mixture_entropy = entropy1 + entropy2
+END FUNCTION
 
 
 SUBROUTINE PAD_NAD(N)
@@ -65,9 +98,11 @@ SUBROUTINE PAD_NAD(N)
     real::helper,parameter
     REAL,allocatable,DIMENSION(:,:)::UTEMP
     REAL,DIMENSION(1:NOF_VARIABLES)::UTMIN,UTMAX
-    integer:: rho_index, p_index, vf_index
-    REAL::CELL_AREA,CELL_SIZE
-    REAL::rho_old,rho_new,p_old,p_new,entropy_old,entropy_new,helper_value
+    integer:: rho_index, p_index, rho1_index, rho2_index, vf_index
+    REAL::CELL_AREA,CELL_SIZE,CELL_NORMALIZATION
+    REAL:: rho_old, p_old, rho1_old, rho2_old, vf_old, entropy_old
+    REAL:: rho_new, p_new, rho1_new, rho2_new, vf_new, entropy_new
+    REAL:: helper_value
 
     allocate(utemp(IMAXDEGFREE+1,1:NOF_VARIABLES+TURBULENCEEQUATIONS+PASSIVESCALAR))
 
@@ -91,7 +126,11 @@ SUBROUTINE PAD_NAD(N)
       case (3)
         rho_index = 1
         p_index = dimensiona + 2
-        vf_index = 0
+        if (governingequations.eq.-1) then
+            rho1_index = p_index + 1
+            rho2_index = rho1_index + 1
+            vf_index = rho2_index + 1
+        end if
 
       case (4) 
         rho_index = 1
@@ -1062,7 +1101,7 @@ SUBROUTINE PAD_NAD(N)
     
     CASE (6)
 
-        IF (ITESTCASE.EQ.3) THEN
+        IF (ITESTCASE.eq.3) THEN
 
             if (CASCADE.eq.1) then
                 parameter = MOOD_VAR5
@@ -1070,7 +1109,8 @@ SUBROUTINE PAD_NAD(N)
                 parameter = MOOD_VAR6
             end if
             
-            !$OMP DO REDUCTION (MAX:MAX_ENTROPY)
+            ! !$OMP DO REDUCTION (MAX:MAX_ENTROPY)
+            !$OMP DO
             DO II=1,NOF_INTERIOR
                 I=EL_INT(II)
                 ICONSIDERED=I
@@ -1086,6 +1126,7 @@ SUBROUTINE PAD_NAD(N)
                     CELL_SIZE = CELL_AREA ** (1/3)
                 end if
                 ! print*,CELL_SIZE
+                CELL_NORMALIZATION = max_cell_area / CELL_AREA
                 
                 !1 copy candidate solution at temp variable   
                 LEFTV(1:NOF_VARIABLES)=U_C(I)%VAL(4,1:NOF_VARIABLES)
@@ -1094,6 +1135,11 @@ SUBROUTINE PAD_NAD(N)
                 CALL CONS2PRIM(N,leftv,MP_PINFl,gammal)
                 rho_new = leftv(rho_index)
                 p_new = leftv(p_index)
+                if (governingequations.eq.-1) then
+                    rho1_new = leftv(rho1_index)
+                    rho2_new = leftv(rho2_index)
+                    vf_new   = leftv(vf_index)
+                end if
                 
                 IF ((rho_new.LE.ZERO).OR.(rho_new.NE.rho_new))THEN						
                     PAD_TRUE=1
@@ -1113,14 +1159,24 @@ SUBROUTINE PAD_NAD(N)
                     rho_old = leftv(rho_index)
                     p_old = leftv(p_index)
                     
-                    entropy_new = ENTROPY(rho_new, p_new, gamma)
-                    entropy_old = ENTROPY(rho_old, p_old, gamma)
+                    if (governingequations.eq.-1) then
+                        rho1_old = leftv(rho1_index)
+                        rho2_old = leftv(rho2_index)
+                        vf_old  = leftv(vf_index)
 
-                    max_entropy = MAX(entropy_old, max_entropy)
+                        entropy_new = mixture_entropy(rho1_new, rho2_new, vf_new, p_new, GAMMA_IN(1), GAMMA_IN(2))
+                        entropy_old = mixture_entropy(rho1_old, rho2_old, vf_old, p_old, GAMMA_IN(1), GAMMA_IN(2))
+                    else
+                        entropy_new = ENTROPY(rho_new, p_new, gamma)
+                        entropy_old = ENTROPY(rho_old, p_old, gamma)
+                    end if
+
+                    ! max_entropy = MAX(entropy_old, max_entropy)
                     
                     ! helper_value = ABS(entropy_new - entropy_old)/CELL_AREA
-                    helper_value = ABS(entropy_new - entropy_old)/CELL_SIZE
+                    ! helper_value = ABS(entropy_new - entropy_old)/CELL_SIZE
                     ! helper_value = ABS(entropy_new - entropy_old)
+                    helper_value = ABS(entropy_new - entropy_old) * CELL_NORMALIZATION
                     ! write(*,*) helper_value
                     IF (helper_value > parameter) THEN
                         NAD_TRUE = 1
@@ -1134,7 +1190,8 @@ SUBROUTINE PAD_NAD(N)
             END DO
             !$OMP END DO		
 
-            !$OMP DO REDUCTION (MAX:MAX_ENTROPY)
+            ! !$OMP DO REDUCTION (MAX:MAX_ENTROPY)
+            !$OMP DO
             DO II=1,NOF_BOUNDED
                 I=EL_BND(II)
                 ICONSIDERED=I
@@ -1150,6 +1207,7 @@ SUBROUTINE PAD_NAD(N)
                 else
                     CELL_SIZE = CELL_AREA ** (1/3)
                 end if
+                CELL_NORMALIZATION = max_cell_area / CELL_AREA
 
                 IF (DIMENSIONA.EQ.3) THEN
                     CALL CONS2PRIM2(N,LEFTV,RIGHTV,MP_PINFL,MP_PINFR,GAMMAL,GAMMAR)
@@ -1158,6 +1216,11 @@ SUBROUTINE PAD_NAD(N)
                 END IF
                 rho_new = leftv(rho_index)
                 p_new = leftv(p_index)
+                if (governingequations.eq.-1) then
+                    rho1_new = leftv(rho1_index)
+                    rho2_new = leftv(rho2_index)
+                    vf_new  = leftv(vf_index)
+                end if
 
                 IF ((rho_new.LE.ZERO).OR.(rho_new.NE.rho_new))THEN						
                     PAD_TRUE=1
@@ -1175,14 +1238,24 @@ SUBROUTINE PAD_NAD(N)
                     rho_old = leftv(rho_index)
                     p_old = leftv(p_index)
                     
-                    entropy_new = ENTROPY(rho_new, p_new, gamma)
-                    entropy_old = ENTROPY(rho_old, p_old, gamma)
+                    if (governingequations.eq.-1) then
+                        rho1_old = leftv(rho1_index)
+                        rho2_old = leftv(rho2_index)
+                        vf_old   = leftv(vf_index)
 
-                    max_entropy = MAX(entropy_old, max_entropy)
+                        entropy_new = mixture_entropy(rho1_new, rho2_new, vf_new, p_new, GAMMA_IN(1), GAMMA_IN(2))
+                        entropy_old = mixture_entropy(rho1_old, rho2_old, vf_old, p_old, GAMMA_IN(1), GAMMA_IN(2))
+                    else
+                        entropy_new = ENTROPY(rho_new, p_new, gamma)
+                        entropy_old = ENTROPY(rho_old, p_old, gamma)
+                    end if
+
+                    ! max_entropy = MAX(entropy_old, max_entropy)
                     
                     ! helper_value = ABS(entropy_new - entropy_old)/CELL_AREA
-                    helper_value = ABS(entropy_new - entropy_old)/CELL_SIZE
+                    ! helper_value = ABS(entropy_new - entropy_old)/CELL_SIZE
                     ! helper_value = ABS(entropy_new - entropy_old)
+                    helper_value = ABS(entropy_new - entropy_old) * CELL_NORMALIZATION
                     ! write(*,*) helper_value
                     IF (helper_value > parameter) THEN
                         NAD_TRUE = 1
