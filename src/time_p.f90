@@ -969,30 +969,29 @@ END SUBROUTINE RUNGE_KUTTA1
 
 
 SUBROUTINE RUNGE_KUTTA2(N)
-!> @brief
-!> SSP RUNGE KUTTA 2ND-ORDER SCHEME
-IMPLICIT NONE
-INTEGER,INTENT(IN)::N
-INTEGER::I,KMAXE
-REAL::AVRGS,OOVOLUME,TO4,OO4,TO3,OO3
-KMAXE=XMPIELRANK(N)
-TO4=3.0D0/4.0D0
-OO4=1.0D0/4.0D0
-TO3=2.0D0/3.0D0
-OO3=1.0D0/3.0D0	
+  !> @brief
+  !> SSP RUNGE KUTTA 2ND-ORDER SCHEME
+  IMPLICIT NONE
+  INTEGER,INTENT(IN)::N
+  INTEGER::I,KMAXE
+  REAL::AVRGS,OOVOLUME,TO4,OO4,TO3,OO3
+  KMAXE=XMPIELRANK(N)
+  TO4=3.0D0/4.0D0
+  OO4=1.0D0/4.0D0
+  TO3=2.0D0/3.0D0
+  OO3=1.0D0/3.0D0	
 
-CALL CALL_FLUX_SUBROUTINES_3D
+  CALL CALL_FLUX_SUBROUTINES_3D
 
+  !$OMP DO
+  DO I=1,KMAXE
+    OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
+    U_C(I)%VAL(2,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
+    U_C(I)%VAL(1,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)-(DT*(RHS(I)%VAL(1:NOF_VARIABLES)*OOVOLUME))
+  END DO
+  !$OMP END DO
 
-!$OMP DO
-DO I=1,KMAXE
-  OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
-  U_C(I)%VAL(2,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
-  U_C(I)%VAL(1,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)-(DT*(RHS(I)%VAL(1:NOF_VARIABLES)*OOVOLUME))
-  
-END DO
-!$OMP END DO
-IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
+  IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
     !$OMP DO
     DO I=1,KMAXE
       OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -1000,33 +999,30 @@ IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
       U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)-(DT*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
     END DO
     !$OMP END DO
-END IF
+  END IF
 
-CALL CALL_FLUX_SUBROUTINES_3D
+  CALL CALL_FLUX_SUBROUTINES_3D
 
-!$OMP DO
-DO I=1,KMAXE
-  OVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
-  U_C(I)%VAL(1,1:NOF_VARIABLES)=(oo2*U_C(I)%VAL(2,1:NOF_VARIABLES))+(oo2*U_C(I)%VAL(1,1:NOF_VARIABLES))-(dt*oo2*(RHS(I)%VAL(1:NOF_VARIABLES)*OOVOLUME))
-END DO
-!$OMP END DO
-
-IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
   !$OMP DO
   DO I=1,KMAXE
     OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
-    U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=(oo2*U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar))+(oo2*U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar))-(dt*oo2*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
+    U_C(I)%VAL(1,1:NOF_VARIABLES)=(oo2*U_C(I)%VAL(2,1:NOF_VARIABLES))+(oo2*U_C(I)%VAL(1,1:NOF_VARIABLES))-(dt*oo2*(RHS(I)%VAL(1:NOF_VARIABLES)*OOVOLUME))
   END DO
   !$OMP END DO
- END IF
 
-IF (AVERAGING.EQ.1)THEN
+  IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
+    !$OMP DO
+    DO I=1,KMAXE
+      OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
+      U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=(oo2*U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar))+(oo2*U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar))-(dt*oo2*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
+    END DO
+    !$OMP END DO
+  END IF
 
-  CALL AVERAGING_T(N)
- 
-END IF
-
-                        
+  IF (AVERAGING.EQ.1)THEN
+    CALL AVERAGING_T(N)
+  END IF
+               
 END SUBROUTINE RUNGE_KUTTA2
 
 
@@ -2704,15 +2700,12 @@ DO JJ=1,upperlimit
   CALL CALL_FLUX_SUBROUTINES_3D
 
   IF (relax.eq.3)THEN
-
     CALL RELAXATION_LUMFREE(N)
-
   ELSE
-
     IF (lowmemory.eq.0)THEN
       CALL RELAXATION(N)
     ELSE
-      ALL RELAXATION_lm(N)
+      CALL RELAXATION_lm(N)
     END IF
   END IF
 
@@ -3965,6 +3958,7 @@ real,dimension(1:5)::DUMMYOUT,DUMMYIN
 INTEGER::I,KMAXE
 REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV1,TOTV2,DUMEtg1,DUMEtg2,TOTK
 real::dtiv,flort
+integer:: NumStepsToOutput1, NumStepsToOutput2
 kmaxe=XMPIELRANK(n)
 kill=0
 T=res_time
