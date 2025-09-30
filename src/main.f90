@@ -37,25 +37,23 @@ USE hybridCWENO_MOOD_module
 
 IMPLICIT NONE
 
-integer::iterator,cell_index
+! integer::iterator,cell_index
+! real::my_size_sum,size_sum,cell_area,cell_size
 
 EXTERNAL METIS_PartMeshDual
 EXTERNAL ParMETIS_V3_PartMeshKway
 !CALL MPI_INIT(IERROR)
 
-
 CALL MPI_INIT_THREAD(MPI_THREAD_FUNNELED,PROVIDED,IERROR)
 CALL MPI_COMM_SIZE(MPI_COMM_WORLD,ISIZE,IERROR)
 CALL MPI_COMM_RANK(MPI_COMM_WORLD,N,IERROR)
-
 
 CALL OPEN_INPUT1(N,ITT) !> Open the input files
 
 CALL TOLERANCES  !> setup the tolerances values
 CALL READ_UCNS3D !> Read all the parameter files
 
- CALL CLOSE_INPUT1(N,ITT) !> Close the input files
-
+CALL CLOSE_INPUT1(N,ITT) !> Close the input files
 
 IF (N.EQ.0)THEN
   CALL TRANSLATE_MESH !> Translate the mesh from fluent msh format to native format
@@ -77,10 +75,7 @@ CPUX1(1)=MPI_WTIME()
 !		       I/O OPERATIONS 				!
 !---------------------------------------------------------------!
 
-
-
 CALL OPEN_ARBITRARY(N,IMAXE,IMAXN,IMAXB) !> Open the grid files
-
 
 CALL SHALLOCATION(IESHAPE,IMAXE) !> Allocate arrays for shape of each element
 
@@ -88,15 +83,10 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, IERROR)
 
 CALL FIND_SHAPE(N,IMAXE,IESHAPE)	!> Find the shape each element
 
-
-
 CALL CHECKRES  !> Check the existence of RESTART/CHECKPOINT files
 
 CALL XMPIALLOCATE(XMPIE,XMPIL,XMPIN,XMPIELRANK,XMPINRANK,IMAXE,IMAXN,NPROC) !> Allocate memory for local and global numbering of elements and nodes
 
-
-
- 
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERROR)
    
 if (emetis.lt.6)then    !> Choose a grid partitioning property if emetis<6 use serial METIS
@@ -131,15 +121,11 @@ else
 	end if
 end if
     
-
-
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERROR)
-
 
 CALL XMPIFIND(XMPIE,XMPIN,XMPIELRANK,XMPINRANK,IMAXE,IMAXN,NPROC) !> Determine the number of elements in this process
 
 call ELALLOCATION(N,XMPIE,XMPIELRANK,IELEM,IMAXE,IESHAPE,ITESTCASE,IMAXB,IBOUND,XMIN,XMAX,YMIN,YMAX,ZMIN,ZMAX) !> Allocate the appropriate memory for each elements
-
 
 CALL READ_INPUT(N,XMPIELRANK,XMPINRANK,XMPIE,XMPIN,IELEM,INODE,IMAXN,IMAXE,IBOUND,IMAXB,XMPINNUMBER,SCALER,INODER) !> Read the grid files and populate the allocated memory values for vertex coordinates and numbering
 
@@ -710,21 +696,39 @@ call local_reconallocation5(n)
 !end if
 
 ! max_entropy = -1000000000.0
-my_max_cell_area = -1.0
+! my_max_cell_area = -1.0
+! DO iterator=1,NOF_INTERIOR
+!     cell_index=EL_INT(iterator)
+!     if (my_max_cell_area < (IELEM(N,cell_index)%TOTVOLUME)) then
+!         my_max_cell_area = IELEM(N,cell_index)%TOTVOLUME
+!     end if
+! END DO
+! DO iterator=1,NOF_BOUNDED
+!     cell_index=EL_BND(iterator)
+!     if (my_max_cell_area < IELEM(N,cell_index)%TOTVOLUME) then
+!         my_max_cell_area = IELEM(N,cell_index)%TOTVOLUME
+!     end if
+! END DO
+! CALL MPI_ALLREDUCE(my_max_cell_area,max_cell_area,1,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IERROR)
+! if (n.eq.0)  WRITE(*,*)"MAX CELL AREA =",max_cell_area
+my_size_sum = 0.0
 DO iterator=1,NOF_INTERIOR
-    cell_index=EL_INT(iterator)
-    if (my_max_cell_area < (IELEM(N,cell_index)%TOTVOLUME)) then
-        my_max_cell_area = IELEM(N,cell_index)%TOTVOLUME
-    end if
+    cell_index = EL_INT(iterator)
+	cell_area = IELEM(N,cell_index)%TOTVOLUME
+	cell_size = sqrt(cell_area)
+	my_size_sum = my_size_sum + cell_size
 END DO
 DO iterator=1,NOF_BOUNDED
     cell_index=EL_BND(iterator)
-    if (my_max_cell_area < IELEM(N,cell_index)%TOTVOLUME) then
-        my_max_cell_area = IELEM(N,cell_index)%TOTVOLUME
-    end if
+    cell_area = IELEM(N,cell_index)%TOTVOLUME
+	cell_size = sqrt(cell_area)
+	my_size_sum = my_size_sum + cell_size
 END DO
-CALL MPI_ALLREDUCE(my_max_cell_area,max_cell_area,1,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IERROR)
-if (n.eq.0)  WRITE(*,*)"MAX CELL AREA =",max_cell_area
+CALL MPI_ALLREDUCE(my_size_sum, size_sum, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERROR)
+cell_size_average = size_sum / IMAXE
+! if (n.eq.0)  WRITE(*,*)"Total cell size =", size_sum, "number of cells =", IMAXE, "average cell size =", cell_size_average
+
+! call abort()
 
 IF (DIMENSIONA.EQ.3)THEN
     !$OMP PARALLEL DEFAULT(SHARED)

@@ -333,6 +333,7 @@ real,dimension(100)::bubble_radius
 INTEGER::NOF_BUBBLES
 real::my_max_cell_area
 real::max_cell_area
+real::cell_size_average
 ! real::max_entropy
 ! real::global_max_entropy
 
